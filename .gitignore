@@ -1,3 +1,8 @@
+# Project-Specific
+INF6102_H25_Projet/code/results/
+
+### Python
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
