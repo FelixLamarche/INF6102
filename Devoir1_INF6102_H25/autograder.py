@@ -14,6 +14,7 @@ if __name__ == '__main__':
                 if validity:
                     if value >= threshold:
                         print(f'instance{instanceId} : ',0.5,'/0.5')
+                        grade += 0.5
                     else:
                         print(f'instance{instanceId} : ',0,'/0.5 (threshold has not been met)')
                 else:
