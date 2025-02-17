@@ -16,7 +16,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
 
     # Instances parameters
-    parser.add_argument('--agent', type=str, default='advanced')
+    parser.add_argument('--agent', type=str, default='advanced2')
     parser.add_argument('--infile', type=str, default='instances/trivial_1.txt')
     parser.add_argument('--viz-node-limit', type=int, default=4500)
 

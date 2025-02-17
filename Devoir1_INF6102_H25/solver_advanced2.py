@@ -143,6 +143,12 @@ class Solver:
         self.__update_Q_of_group(old_group_label, old_group_new_Q)
         self.__update_Q_of_group(new_group_label, new_group_new_Q)
 
+        # Check if swapping the node created disconnections
+        if self.is_group_disconnected(old_group_label):
+            new_labels = self.split_disconnected_group(old_group_label)
+            for new_label in new_labels:
+                self.__update_Q_of_group(new_label, self.calculate_group_Q(new_label))
+
     def merge_groups(self, group_1_label: int, group_2_label: int, merged_Q: float):
         group_1 = self.groups[group_1_label]
         group_2 = self.groups[group_2_label]
@@ -242,6 +248,57 @@ class Solver:
         for i, node in enumerate(self.instance.nodes):
             node.set_group_label(i)
             self.groups[i] = [node]
+
+    def is_group_disconnected(self, group_label: int) -> bool:
+        group = self.groups[group_label]
+        if not group:
+            return False
+        visited = set()
+        queue = [group[0]]  # Start from any node in the group
+        while queue:
+            node = queue.pop()
+            if node.get_idx() in visited:
+                continue
+            visited.add(node.get_idx())
+            for neighbor_idx in node.neighbors():
+                neighbor = self.get_node(neighbor_idx)
+                if neighbor.group_label == group_label and neighbor.get_idx() not in visited:
+                    queue.append(neighbor)
+        return len(visited) != len(group)
+    
+    def split_disconnected_group(self, group_label:int) -> list[int]:
+        group = self.groups[group_label]
+        visited = set()
+        subgroups = []
+
+        for node in group:
+            if node.get_idx() not in visited:
+                new_subgroup = []
+                queue = [node]
+                while queue:
+                    current_node = queue.pop()
+                    if current_node.get_idx() not in visited:
+                        visited.add(current_node.get_idx())
+                        new_subgroup.append(current_node)
+                        for neighbor_idx in current_node.neighbors():
+                            neighbor = self.get_node(neighbor_idx)
+                            if neighbor.get_idx() not in visited and neighbor in group:
+                                queue.append(neighbor)
+                subgroups.append(new_subgroup)
+
+        # Remove the original group and assign new labels
+        self.groups.pop(group_label)
+        new_labels = []
+        for i, subgroup in enumerate(subgroups):
+            new_label = max(self.groups.keys(), default=-1) + 1
+            new_labels.append(new_label)
+            self.groups[new_label] = subgroup
+            for node in subgroup:
+                node.set_group_label(new_label)
+            self.groups_Q[new_label] = self.calculate_group_Q(new_label)
+
+        return new_labels
+
 
 
 def solve(instance: Instance) -> Solution:
