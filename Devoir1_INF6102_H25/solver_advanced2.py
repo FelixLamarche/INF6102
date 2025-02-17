@@ -245,7 +245,7 @@ class Solver:
         self.Q += new_group_Q - old_group_Q
 
     def __set_initial_groups(self):
-        for i, node in enumerate(self.instance.nodes):
+        for i, node in sorted(enumerate(self.instance.nodes), key=lambda x: len(x[1].neighbors()), reverse=True):
             node.set_group_label(i)
             self.groups[i] = [node]
 
