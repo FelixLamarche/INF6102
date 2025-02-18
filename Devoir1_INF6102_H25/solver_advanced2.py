@@ -9,9 +9,14 @@ class CustomNode(Node):
     def __init__(self, idx, neighbors: list[int]):
         super().__init__(idx, neighbors)
         self.group_label = idx
+        self.__degree = len(neighbors)
+        self.neighbor_set = set(neighbors)
     
+    def degree(self) -> int:
+        return self.__degree
+
     def is_adjacent_to(self, node: Node):
-        return node.get_idx() in self.neighbors()
+        return node.get_idx() in self.neighbor_set
     
     def set_group_label(self, group_label: int):
         self.group_label = group_label
@@ -36,13 +41,15 @@ class Solver:
         prev_Q = self.Q
         MIN_DELTA_Q = 0.0001
         is_getting_better = True
-        nb_iters = 1
+        nb_iters = 0
         while is_getting_better:
+            print("\nLPAm iteration: " + str(nb_iters))
             self.solve_LPAm()
+            print("\nMerge iteration: " + str(nb_iters))
             self.solve_greedy_merge()
-            print("nb_iterations of LPAm + merge: " + str(nb_iters))
-            print("Q: " + str(self.Q) + " prev_Q: " + str(prev_Q))
+
             nb_iters += 1
+            print("\nQ: " + str(self.Q) + " | nb_iterations of LPAm + merge: " + str(nb_iters) + "\n")
 
             if self.Q - prev_Q <= MIN_DELTA_Q:
                 is_getting_better = False
@@ -53,8 +60,11 @@ class Solver:
 
         is_merging = True
         nb_iterations = 0
+        nb_merges = 0
         while is_merging:
             prev_Q = self.Q
+            # Cache the Q of the neighboring labels to avoid recalculating them
+            group_merged_Qs = {}
             for label_1, group_1 in self.groups.items():
                 if len(group_1) == 0:
                     continue
@@ -62,28 +72,42 @@ class Solver:
                 max_delta_Q = 0
                 max_merge_Q = 0
 
-                # Cache the Q of the neighboring labels to avoid recalculating them
-                group_merged_Qs = {}
+                if label_1 not in group_merged_Qs:
+                    group_merged_Qs[label_1] = {}
+
                 for node in group_1:
                     for neighbor_idx in node.neighbors():
                         label_2 = self.get_node(neighbor_idx).group_label
                         group_2 = self.groups[label_2]
-                        if label_1 == label_2 or len(group_2) == 0 or label_2 in group_merged_Qs:
+                        if label_1 == label_2 or len(group_2) == 0 or (label_2 in group_merged_Qs and label_1 in group_merged_Qs[label_2]):
                             continue
                         merge_Q = self.calculate_Q_of_merge(label_1, label_2)
                         delta_merge_Q = self.calculate_Q_delta_of_merge(label_1, label_2, merge_Q)
-                        group_merged_Qs[label_2] = merge_Q
+
+                        # Cache results
+                        group_merged_Qs[label_1][label_2] = merge_Q
+                        if label_2 not in group_merged_Qs:
+                            group_merged_Qs[label_2] = {}
+                        group_merged_Qs[label_2][label_1] = merge_Q
+
                         if delta_merge_Q > max_delta_Q:
                             max_delta_Q = delta_merge_Q
                             max_merge_Q = merge_Q
                             merging_label = label_2
                 if merging_label != -1:
                     self.merge_groups(label_1, merging_label, max_merge_Q)
+                    nb_merges += 1
+
+                    # Remove the merged labels from the cache as the group has changed
+                    group_merged_Qs.pop(merging_label)
+                    group_merged_Qs.pop(label_1)
+                    for label in group_merged_Qs.keys():
+                        group_merged_Qs[label].pop(merging_label, None)
+                        group_merged_Qs[label].pop(label_1, None)
                 nb_iterations += 1
             self.__remove_empty_groups()
 
-            print("Q: " + str(self.Q))
-            print("nb_iterations: " + str(nb_iterations))
+            print("Q: " + str(self.Q) + " | nbMerges: " + str(nb_merges) + " | nbIterations: " + str(nb_iterations))
             # Halting condition
             if self.Q - prev_Q <= MIN_DELTA_Q:
                 is_merging = False
@@ -95,6 +119,7 @@ class Solver:
         is_getting_better = True
 
         while is_getting_better:
+            nb_swaps = 0
             for node in self.instance.nodes:
                 node_group = self.groups[node.group_label]
                 node_group_Q_with = self.groups_Q[node.group_label]
@@ -125,10 +150,11 @@ class Solver:
                 
                 if best_group_label != node.group_label:
                     self.swap_node_group(node, node.group_label, best_group_label, node_group_Q_without, best_group_new_Q)
+                    nb_swaps += 1
                 self.__remove_empty_groups()
 
             # Halting condition
-            print("Q: " + str(self.Q) + " prev_Q: " + str(prev_Q))
+            print("Q: " + str(self.Q) + " | nbNodeSwaps: " + str(nb_swaps))
             if self.Q - prev_Q <= MIN_DELTA_Q:
                 is_getting_better = False
             prev_Q = self.Q
