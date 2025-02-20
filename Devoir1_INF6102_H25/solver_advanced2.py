@@ -9,14 +9,12 @@ class CustomNode(Node):
     def __init__(self, idx, neighbors: list[int]):
         super().__init__(idx, neighbors)
         self.group_label = idx
-        self.__degree = len(neighbors)
+        self.k = len(neighbors) # Degree of the node
+        self.idx = idx
         self.neighbor_set = set(neighbors)
     
-    def degree(self) -> int:
-        return self.__degree
-
-    def is_adjacent_to(self, node: Node):
-        return node.get_idx() in self.neighbor_set
+    def is_adjacent_to(self, node: Node) -> bool:
+            return node.idx in self.neighbor_set
     
     def set_group_label(self, group_label: int):
         self.group_label = group_label
@@ -203,7 +201,7 @@ class Solver:
         # Get the delta of the merge of the two groups
         for node1 in group_1:
             for node2 in group_2:
-                P = node1.degree() * node2.degree() / M2
+                P = node1.k * node2.k / M2
                 Q_delta += (1 - P) if node2.is_adjacent_to(node1) else -(P)
         
         Q_delta *= 2
@@ -216,7 +214,7 @@ class Solver:
         group = self.groups[group_label]
         for node1 in group:
             for node2 in group:
-                P = node1.degree() * node2.degree() / M2
+                P = node1.k * node2.k / M2
                 Q_group += (1 - P) if node2.is_adjacent_to(node1) else -(P)
         return Q_group / M2
     
@@ -227,7 +225,7 @@ class Solver:
         Q_delta = 0
         # Add the delta of the node with all the other nodes in the group
         for node2 in group:
-            P = node.degree() * node2.degree() / M2
+            P = node.k * node2.k / M2
             Q_delta += (1 - P) if node2.is_adjacent_to(node) else -(P)
 
         # Multiply by 2 for the symmetry of (nodeX with nodeY) and (nodeY with nodeX)
@@ -245,13 +243,13 @@ class Solver:
         Q_delta = 0
         # Add the delta of the node with all the other nodes in the group
         for node2 in group:
-            P = node.degree() * node2.degree() / M2
+            P = node.k * node2.k / M2
             Q_delta += (1 - P) if node2.is_adjacent_to(node) else -(P)
 
         # Multiply by 2 for the symmetry of (nodeX with nodeY) and (nodeY with nodeX)
         Q_delta *= 2
         # add the delta of the node with itself
-        P = node.degree() * node.degree() / M2
+        P = node.k * node.k / M2
         Q_group += -(P)
 
         return (Q_group - Q_delta) / M2
