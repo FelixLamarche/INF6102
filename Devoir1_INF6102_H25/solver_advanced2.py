@@ -32,6 +32,8 @@ class Solver:
         self.groups_Q = {label: self.calculate_group_Q(label) for label, group in self.groups.items()}
         self.Q = sum(self.groups_Q.values())
 
+        self.group_Q_merges = {}
+
     def to_solution(self) -> Solution:
         return Solution([ list(map(lambda node: node.get_idx(), group)) for group in self.groups.values() if len(group) > 0])
 
@@ -61,32 +63,35 @@ class Solver:
         nb_merges = 0
         while is_merging:
             prev_Q = self.Q
-            # Cache the Q of the neighboring labels to avoid recalculating them
-            group_merged_Qs = {}
             for label_1, group_1 in self.groups.items():
                 if len(group_1) == 0:
                     continue
                 merging_label = -1
                 max_delta_Q = 0
                 max_merge_Q = 0
+                group_1_Q = self.groups_Q[label_1]
+                group_1_ID = str(label_1) + "-" + str(group_1_Q)
 
-                if label_1 not in group_merged_Qs:
-                    group_merged_Qs[label_1] = {}
+                if group_1_ID not in self.group_Q_merges:
+                    self.group_Q_merges[group_1_ID] = {}
 
                 for node in group_1:
                     for neighbor_idx in node.neighbors():
                         label_2 = self.get_node(neighbor_idx).group_label
                         group_2 = self.groups[label_2]
-                        if label_1 == label_2 or len(group_2) == 0 or (label_2 in group_merged_Qs and label_1 in group_merged_Qs[label_2]):
+                        group_2_Q = self.groups_Q[label_2]
+                        group_2_ID = str(label_2) + "-" + str(group_2_Q)
+
+                        if label_1 == label_2 or len(group_2) == 0 or (group_2_ID in self.group_Q_merges[group_1_ID]):
                             continue
                         merge_Q = self.calculate_Q_of_merge(label_1, label_2)
                         delta_merge_Q = self.calculate_Q_delta_of_merge(label_1, label_2, merge_Q)
 
                         # Cache results
-                        group_merged_Qs[label_1][label_2] = merge_Q
-                        if label_2 not in group_merged_Qs:
-                            group_merged_Qs[label_2] = {}
-                        group_merged_Qs[label_2][label_1] = merge_Q
+                        self.group_Q_merges[group_1_ID][group_2_ID] = merge_Q
+                        if group_2_ID not in self.group_Q_merges:
+                            self.group_Q_merges[group_2_ID] = {}
+                        self.group_Q_merges[group_2_ID][group_1_ID] = merge_Q
 
                         if delta_merge_Q > max_delta_Q:
                             max_delta_Q = delta_merge_Q
@@ -96,12 +101,6 @@ class Solver:
                     self.merge_groups(label_1, merging_label, max_merge_Q)
                     nb_merges += 1
 
-                    # Remove the merged labels from the cache as the group has changed
-                    group_merged_Qs.pop(merging_label)
-                    group_merged_Qs.pop(label_1)
-                    for label in group_merged_Qs.keys():
-                        group_merged_Qs[label].pop(merging_label, None)
-                        group_merged_Qs[label].pop(label_1, None)
                 nb_iterations += 1
             self.__remove_empty_groups()
 
@@ -206,6 +205,7 @@ class Solver:
         
         Q_delta *= 2
         Q_delta /= M2
+
         return group_1_Q + group_2_Q + Q_delta
 
     def calculate_group_Q(self, group_label: int) -> float:
