@@ -40,7 +40,7 @@ if __name__ == '__main__':
         solution = solver_naive.solve(instance)
     elif args.agent == "advanced":
         # Your nice agent
-        solution = test2_solver_advanced.solve(instance)
+        solution = solver_advanced.solve(instance)
     elif args.agent == "advanced2":
         # Your nice agent
         solution = solver_advanced2.solve(instance)
