@@ -40,7 +40,7 @@ def process_instance(instance_file, agent, viz_node_limit):
     if agent == "naive":
         solution = solver_naive.solve(instance)
     elif agent == "advanced":
-        solution = test2_solver_advanced.solve(instance)
+        solution = solver_advanced.solve(instance)
     elif agent == "advanced2":
         solution = solver_advanced2.solve(instance)
     else:
