@@ -29,7 +29,7 @@ class SolverAdvanced:
         self.min_dists_to_root[self.instance.get_root().idx()] = 0
         self.dists_to_root = {idx: 999999 for idx, node in self.nodes.items()} # Distance to the root node currently
         self.dists_to_root[self.instance.get_root().idx()] = 0
-        self.node_edges = {}
+        self.node_edges : dict[int, set[Edge]] = {}
         self.fill_node_edges()
         self.fill_nodes_min_dist_to_root()
 
@@ -114,7 +114,7 @@ class SolverAdvanced:
                 if profit_node in self.nodes_solution:
                     if profit_node == self.instance.get_root():
                         continue
-                    if len(set(self.instance.get_neighbors(profit_node)).intersection(self.edges_solution)) > 1:
+                    if len(self.node_edges[profit_node.idx()].intersection(self.edges_solution)) > 1:
                         continue
 
                     nodes_to_remove, edges_to_remove = self.get_path_to_remove_node(profit_node)
@@ -280,7 +280,7 @@ class SolverAdvanced:
 
             visited_nodes[current_node.idx()] = (dist, current_node, prev_edge)
 
-            for edge in self.instance.get_neighbors(current_node):
+            for edge in self.node_edges[current_node.idx()]:
                 other_node = self.get_other_node_of_edge(edge, current_node)
                 if other_node in self.nodes_solution:
                     connected_element = (dist + 1, other_node, edge)
@@ -320,7 +320,7 @@ class SolverAdvanced:
         nodes_to_remove = set()
 
         nodes_to_remove.add(node) # Always remove the node to remove
-        edges_to_remove.update(set(self.instance.get_neighbors(node)).intersection(self.edges_solution))
+        edges_to_remove.update(self.node_edges[node.idx()].intersection(self.edges_solution))
         queue.extend(self.get_other_node_of_edge(edge, node) for edge in edges_to_remove)
 
         while len(queue) > 0:
@@ -331,7 +331,7 @@ class SolverAdvanced:
             if node in nodes_to_remove:
                 continue
 
-            node_edges = set(self.instance.get_neighbors(node)).intersection(self.edges_solution)
+            node_edges = self.node_edges[node.idx()].intersection(self.edges_solution)
             neighbor_nodes = set(self.get_other_node_of_edge(edge, node) for edge in node_edges)
             neighbor_nodes.intersection_update(self.nodes_solution)
             neighbor_nodes.difference_update(nodes_to_remove)
@@ -357,7 +357,7 @@ class SolverAdvanced:
         best_edges = set()
         best_edge_profit = 0
 
-        for edge in self.instance.get_neighbors(node):
+        for edge in self.node_edges[node.idx()]:
             if edge in edges_used:
                 continue
 
@@ -388,7 +388,7 @@ class SolverAdvanced:
             distance, current = queue.pop(0)
             self.min_dists_to_root[current.idx()] = min(distance, self.min_dists_to_root[current.idx()])
 
-            for edge in self.instance.get_neighbors(current):
+            for edge in self.node_edges[current.idx()]:
                 other_node_idx = list(edge.idx().difference((current,)))[0].idx()
                 if self.min_dists_to_root[other_node_idx] > distance + 1:
                     other_node = self.nodes[other_node_idx]
@@ -423,7 +423,7 @@ def solve(instance: Instance) -> Solution:
     best_solution = None
     best_revenue = -1
     time_before = time.time()
-    search_time = 10
+    search_time = 0.001
 
     while time_before + search_time > time.time():
         solver = SolverAdvanced(instance)
