@@ -3,6 +3,9 @@
 # Auriane Peter–Hemon - 2310513
 
 from utils import Node, Instance, Solution, Edge
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
 import math
 import random
 import time
@@ -87,14 +90,17 @@ class SolverAdvanced:
             Simulated Annealing Version
         """
         self.init_solution_empty()
-        temp = 10000000000000 # to choose through experimentation
-        cooling_rate = 0.999 # to choose through experimentation
+        temp = 10000000000 # to choose through experimentation
+        cooling_rate = 0.99999 # to choose through experimentation
 
-        nb_iterations_before_amelioration = 75
-        cur_iteration = 0
+        nb_iterations_before_amelioration = 1000000
+        nb_iterations_before_change = 25
+        cur_iteration_amelioration = 0
+        cur_iteration_change = 0
+        nb_iteration = 0
         prev_revenue = -1
 
-        while cur_iteration < nb_iterations_before_amelioration:
+        while cur_iteration_amelioration < nb_iterations_before_amelioration and cur_iteration_change < nb_iterations_before_change:
             do_remove_node = False
             chosen_revenue_node = None
             chosen_revenue_cost_ratio = 0
@@ -180,21 +186,26 @@ class SolverAdvanced:
                 self.cost += chosen_cost
                 self.revenue += chosen_revenue
 
-            #self.instance.visualize_solution(Solution(self.edges_solution))
-            # Continue while there are ameliorations
-            temp = temp * cooling_rate
-            cur_iteration += 1
-            if self.revenue > prev_revenue:
-                cur_iteration = 0
+            cur_iteration_amelioration += 1
+            cur_iteration_change += 1
+            nb_iteration += 1
+
+            #self.visualize_solution(Solution(self.edges_solution), nb_iteration)
+            #print(nb_iteration, self.revenue, self.cost, temp)
+            # Only cool down if we have changed the solution
+            if chosen_revenue_node is not None:
+                cur_iteration_change = 0
+                temp = temp * cooling_rate
+
             prev_revenue = self.revenue
             if self.revenue > self.best_revenue:
-                cur_iteration = 0
+                cur_iteration_amelioration = 0
                 self.best_edge_solution = self.edges_solution.copy()
                 self.best_revenue = self.revenue
                 print(self.revenue)
             
-        print(self.revenue)
-        print("temp:" + str(temp), "cur_iteration:" + str(cur_iteration))
+        print("Final revenue: " + str(self.revenue), "Final cost: " + str(self.cost), "Final iteration: " + str(nb_iteration))
+        print("temp:" + str(temp), "cur_iteration:" + str(cur_iteration_amelioration))
 
 
     def solve_profit_nodes_hill_climb(self):
@@ -306,7 +317,7 @@ class SolverAdvanced:
             prev_node = self.get_other_node_of_edge(prev_edge, prev_node)
 
         return path
-    
+
     def get_path_to_remove_node(self, node: CustomNode) -> tuple[set[CustomNode], set[Edge]]:
         """Returns the path exclusive to the node(in the solution) that can be removed with the specific node"""
         if node is self.instance.get_root():
@@ -324,24 +335,49 @@ class SolverAdvanced:
         queue.extend(self.get_other_node_of_edge(edge, node) for edge in edges_to_remove)
 
         while len(queue) > 0:
-            node = queue.pop(0)
-            if node in visited_nodes:
+            cur_node = queue.pop(0)
+            if cur_node in visited_nodes:
                 continue
-            visited_nodes.add(node)
-            if node in nodes_to_remove:
+            visited_nodes.add(cur_node)
+            if cur_node in nodes_to_remove:
+                continue
+            if cur_node.idx() in self.revenue_nodes and cur_node != node:
                 continue
 
-            node_edges = self.node_edges[node.idx()].intersection(self.edges_solution)
-            neighbor_nodes = set(self.get_other_node_of_edge(edge, node) for edge in node_edges)
+            node_edges = self.node_edges[cur_node.idx()].intersection(self.edges_solution)
+            neighbor_nodes = set(self.get_other_node_of_edge(edge, cur_node) for edge in node_edges)
             neighbor_nodes.intersection_update(self.nodes_solution)
             neighbor_nodes.difference_update(nodes_to_remove)
             if len(neighbor_nodes) <= 1:
-                nodes_to_remove.add(node)
+                nodes_to_remove.add(cur_node)
                 edges_to_remove.update(node_edges)
                 if len(neighbor_nodes) == 1:
                     queue.append(neighbor_nodes.pop())
 
         return nodes_to_remove, edges_to_remove
+
+    def get_path_to_remove_node2(self, node: CustomNode) -> tuple[set[CustomNode], set[Edge]]:
+        to_remove_nodes, to_remove_edges = self.get_path_to_remove_node(node)
+        
+        leftover_edges = self.edges_solution.copy()
+        leftover_edges.difference_update(to_remove_edges)
+
+        sol = Solution(leftover_edges)
+        disconected_edges = self.instance.edges_disconnected_from_root(sol)
+        to_remove_edges.union(disconected_edges)
+        leftover_edges.difference_update(disconected_edges)
+        leftover_nodes = set()
+        for edge in leftover_edges:
+            leftover_nodes.update(edge.idx())
+
+        to_remove_nodes = self.nodes_solution.copy()
+        to_remove_nodes.difference_update(leftover_nodes)
+                
+        # Never remove the root_node
+        root_node = self.instance.get_root()
+        if root_node in to_remove_nodes:
+            to_remove_nodes.remove(root_node)
+        return to_remove_nodes, to_remove_edges
 
     def probability_annealing(self, temp: float, new_revenue: int, cur_revenue: int) -> bool:
         if new_revenue > cur_revenue:
@@ -409,6 +445,58 @@ class SolverAdvanced:
         self.edges_solution = set(edge for edge in self.instance.edges)
         self.cost = sum(edge.cost() for edge in self.edges_solution)
 
+    def visualize_solution(self, sol: Solution, iter: int):
+        """
+            Show and save the solution's visualization
+        """
+        figure_size = (18,14) 
+
+        G = nx.Graph()
+        G.add_nodes_from([n for n in self.instance.nodes.values()])
+        G.add_edges_from([e.idx() for e in self.instance.edges])
+        pos = nx.bfs_layout(G, self.instance.get_root(), align="horizontal")
+        pos[self.instance.get_root()] = (0,0)
+        if len(self.instance.edges) >= 1000:
+            k = 15/np.sqrt(len(G.nodes()))
+        else:
+            k = 6/np.sqrt(len(G.nodes()))
+        pos = nx.spring_layout(G, k=k, pos=pos, fixed=[self.instance.get_root()], seed=38206, scale=10)
+        # Nodes colored by cluster
+        fig, _ = plt.subplots(figsize=figure_size)
+
+        # nx.draw(G, pos=pos, ax=ax)
+        nx.draw_networkx_nodes(G, pos, [self.instance.get_root()], node_shape="s", node_color="red", node_size=750)
+        nx.draw_networkx_nodes(G, pos, set(self.instance.profit_nodes.values()).difference((self.instance.get_root(),)), node_shape="v", node_color="orange", node_size=500)
+        nx.draw_networkx_nodes(G, pos, {n for n in self.instance.nodes.values()}.difference(self.instance.profit_nodes.values()),)
+        
+        path = list(map(lambda x: tuple(x.idx()),sol.get_path()))
+        nx.draw_networkx_edges(G, pos, path)
+
+        node_labels: dict[Node, str] = {}
+        edge_labels: dict[tuple[Node,Node], str] = {}
+        for edge in sol.get_path():
+            edge_labels[tuple(edge.idx())] = edge.cost()
+            for node in edge.idx():
+                if node.revenue() > 0:
+                    node_labels[node] = str(node.revenue())
+                else:
+                    node_labels[node] = ""
+
+        nx.draw_networkx_labels(G, pos, node_labels)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels)
+
+
+        multi_path = self.instance.break_path(sol.get_path())
+        colors = self.instance.generate_distinct_colors(len(multi_path))
+        for i_path, color in zip(multi_path, colors): 
+            nx.draw_networkx_edges(G, pos, i_path, edge_color=color, width=15, alpha=0.5)
+
+        revenu = self.instance.solution_value(sol)
+        consummed = self.instance.solution_cost(sol)
+        fig.suptitle(f"Solution de {self.instance.filepath.stem}\nBudget consommé = {consummed}, Revenu = {revenu}", fontsize=18)
+        fig.tight_layout()
+        plt.savefig("visualization_"+str(iter)+".png")
+
     
 def solve(instance: Instance) -> Solution:
     """Write your code here
@@ -423,7 +511,7 @@ def solve(instance: Instance) -> Solution:
     best_solution = None
     best_revenue = -1
     time_before = time.time()
-    search_time = 0.001
+    search_time = 60
 
     while time_before + search_time > time.time():
         solver = SolverAdvanced(instance)
