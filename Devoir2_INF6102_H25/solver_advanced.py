@@ -6,12 +6,12 @@ from utils import Node, Instance, Solution, Edge
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+import csv
 import math
 import random
 import time
 
 class CustomNode(Node):
-
     """ You are completely free to extend classes defined in utils,
         this might prove useful or enhance code readability
     """
@@ -28,11 +28,11 @@ class SolverAdvanced:
         self.instance.nodes = {idx: CustomNode(idx, node.revenue()) for idx, node in self.instance.nodes.items()}
         self.nodes : dict[int, CustomNode] = self.instance.nodes
         
-        self.min_dists_to_root = {idx: 9999999 for idx, node in self.nodes.items()}  # Minimum distance to the root node
-        self.min_dists_to_root[self.instance.get_root().idx()] = 0
-        self.dists_to_root = {idx: 999999 for idx, node in self.nodes.items()} # Distance to the root node currently
-        self.dists_to_root[self.instance.get_root().idx()] = 0
-        self.node_edges : dict[int, set[Edge]] = {}
+        self.min_dists_to_root = {idx: 9999999 for idx, node in self.nodes.items()}  # Minimum distance to the root node if all edges are used
+        self.min_dists_to_root[self.instance.get_root().idx()] = 0 # The root node is at distance 0
+        self.dists_to_root = {idx: 999999 for idx, node in self.nodes.items()} # Distance to the root node in the current solution
+        self.dists_to_root[self.instance.get_root().idx()] = 0 # The root node is at distance 0
+        self.node_edges : dict[int, set[Edge]] = {} # Edges connected to each node
         self.fill_node_edges()
         self.fill_nodes_min_dist_to_root()
 
@@ -49,6 +49,10 @@ class SolverAdvanced:
 
 
     def solve_edges(self):
+        """
+        Solves the problem by adding the best edges (that add the most profit) to the solution
+        N.B. Does not work well
+        """
         self.init_solution_empty()
 
         queue = [(0, self.instance.get_root())]
@@ -84,21 +88,23 @@ class SolverAdvanced:
             self.cost += best_edge.cost()
             self.revenue += self.get_edge_revenue(best_edge, current_node)
 
-    def solve_profit_nodes_simulated_annealing(self):
+    def solve_profit_nodes_simulated_annealing(self, temp: int = 1000000, cooling_rate: float = 0.9999, tabu_iteration_length: int = 10):
         """
-        Solves the problem by looking at profit nodes and adding all of the edges and nodes to reach them
+        Solves the problem by trying to add and remove profit nodes by adding all the missing node and edges to reach them
+        Tries to pick the profit node which adds the most revenue, or can randomly add a or remove a profit node
             Simulated Annealing Version
+            Gets around 5.5/8.0 on the test instances, and is slow
         """
         self.init_solution_empty()
-        temp = 10000000000 # to choose through experimentation
-        cooling_rate = 0.99999 # to choose through experimentation
 
-        nb_iterations_before_amelioration = 1000000
-        nb_iterations_before_change = 25
+        nb_iterations_before_amelioration = 100000
+        nb_iterations_before_change = 50
         cur_iteration_amelioration = 0
         cur_iteration_change = 0
         nb_iteration = 0
         prev_revenue = -1
+
+        tabu_dict = dict()
 
         while cur_iteration_amelioration < nb_iterations_before_amelioration and cur_iteration_change < nb_iterations_before_change:
             do_remove_node = False
@@ -115,6 +121,9 @@ class SolverAdvanced:
             for profit_node_idx in revenue_nodes_idx:
                 profit_node = self.revenue_nodes[profit_node_idx]
                 if self.min_dists_to_root[profit_node.idx()] > self.max_distance:
+                    continue
+
+                if profit_node.idx() in tabu_dict and tabu_dict[profit_node.idx()] > 0:
                     continue
 
                 if profit_node in self.nodes_solution:
@@ -197,21 +206,27 @@ class SolverAdvanced:
                 cur_iteration_change = 0
                 temp = temp * cooling_rate
 
+                tabu_dict[chosen_revenue_node.idx()] = tabu_iteration_length
+
+            for node_idx in tabu_dict.keys():
+                tabu_dict[node_idx] -= 1
+            
             prev_revenue = self.revenue
             if self.revenue > self.best_revenue:
                 cur_iteration_amelioration = 0
                 self.best_edge_solution = self.edges_solution.copy()
                 self.best_revenue = self.revenue
-                print(self.revenue)
+                #print(self.revenue)
             
-        print("Final revenue: " + str(self.revenue), "Final cost: " + str(self.cost), "Final iteration: " + str(nb_iteration))
-        print("temp:" + str(temp), "cur_iteration:" + str(cur_iteration_amelioration))
-
+        #print("Final revenue: " + str(self.revenue), "Final cost: " + str(self.cost), "Final iteration: " + str(nb_iteration))
+        #print("temp:" + str(temp), "cur_iteration:" + str(cur_iteration_amelioration))
 
     def solve_profit_nodes_hill_climb(self):
         """
         Solves the problem by looking at profit nodes and adding all of the edges and nodes to reach them
+        Each iteration, adds the profit node (with all the edges and nodes to reach them) that has the best revenue/cost ratio
             Hill Climbing Version
+            Gets around 5.25/8.0 on the test instances, and is quick
         """
         self.init_solution_empty()
 
@@ -276,7 +291,8 @@ class SolverAdvanced:
 
 
     def get_additional_path_to_node(self, node: CustomNode) -> list[tuple[int, CustomNode, Edge]]:
-        """Returns the additional edges and nodes to reach the node from the current solution through a DFS"""
+        """Returns the additional edges and nodes that are not in the solution to reach the given node from the current solution through a DFS"""
+        # To test: try to return the path with the lowest cost and not only the lowest distance
         if node in self.nodes_solution:
             return list()
         
@@ -319,7 +335,9 @@ class SolverAdvanced:
         return path
 
     def get_path_to_remove_node(self, node: CustomNode) -> tuple[set[CustomNode], set[Edge]]:
-        """Returns the path exclusive to the node(in the solution) that can be removed with the specific node"""
+        """Returns the path exclusive to the node(in the solution) that can be removed including the node itself
+        Works well only if the node has degree 1
+        """
         if node is self.instance.get_root():
             return set(), set()
         
@@ -357,6 +375,12 @@ class SolverAdvanced:
         return nodes_to_remove, edges_to_remove
 
     def get_path_to_remove_node2(self, node: CustomNode) -> tuple[set[CustomNode], set[Edge]]:
+        """
+        Returns all the nodes and edges that should be removed to remove the target node from the solution
+        Including the nodes that are disconnected from the root node, and the edges that are disconnected from the solution
+        and the nodes that are with no profits that that aren't necessary to reahch any profit node
+        N.B. Does not work properly
+        """
         to_remove_nodes, to_remove_edges = self.get_path_to_remove_node(node)
         
         leftover_edges = self.edges_solution.copy()
@@ -380,6 +404,7 @@ class SolverAdvanced:
         return to_remove_nodes, to_remove_edges
 
     def probability_annealing(self, temp: float, new_revenue: int, cur_revenue: int) -> bool:
+        """Returns True if we should accept the new revenue according to the simulated annealing probability"""
         if new_revenue > cur_revenue:
             return True
         f = math.exp((new_revenue - cur_revenue) / temp)
@@ -390,6 +415,11 @@ class SolverAdvanced:
         return list(edge.idx().difference((connected_node,)))[0]
 
     def get_best_edges_neighboring_edge(self, node: CustomNode, cur_cost: int, edges_used: set[Edge]) -> set[Edge]:
+        """
+        Returns the edges connected to the node that are not in the solution and that can be added to the solution
+        which increases the profit the most
+        N.B. Does not work properly
+        """
         best_edges = set()
         best_edge_profit = 0
 
@@ -418,6 +448,7 @@ class SolverAdvanced:
         return self.revenue_nodes[other_idx].revenue() if other_idx in self.revenue_nodes else 0
     
     def fill_nodes_min_dist_to_root(self):
+        """Fills the minimum possible distance to the root node for each node if all edges are used"""
         queue = [(0, self.instance.get_root())]
 
         while len(queue) > 0:
@@ -431,10 +462,12 @@ class SolverAdvanced:
                     queue.append((distance + 1, other_node))
 
     def fill_node_edges(self):
+        """Fills the node_edges dictionary with the edges connected to each node"""
         for node in self.nodes.values():
             self.node_edges[node.idx()] = set(edge for edge in self.instance.get_neighbors(node))
 
     def init_solution_empty(self):
+        """Initializes the solution with no edges and only the root node"""
         self.edges_solution = set()
         self.nodes_solution = set()
         self.nodes_solution.add(self.instance.get_root())
@@ -442,8 +475,14 @@ class SolverAdvanced:
         self.cost = 0
     
     def init_solution_full(self):
+        """Initializes the solution with all edges"""
         self.edges_solution = set(edge for edge in self.instance.edges)
         self.cost = sum(edge.cost() for edge in self.edges_solution)
+
+
+    ######################
+    ### UTILITIES
+    ######################
 
     def visualize_solution(self, sol: Solution, iter: int):
         """
@@ -510,15 +549,75 @@ def solve(instance: Instance) -> Solution:
 
     best_solution = None
     best_revenue = -1
-    time_before = time.time()
-    search_time = 60
+    search_time = 1
 
+    time_before = time.time()
     while time_before + search_time > time.time():
         solver = SolverAdvanced(instance)
+        #solver.solve_edges()
+        #solver.solve_profit_nodes_hill_climb()
         solver.solve_profit_nodes_simulated_annealing()
-
         if solver.best_revenue > best_revenue:
             best_solution = solver.best_edge_solution
             best_revenue = solver.best_revenue
+
+    return Solution(best_solution)
+
+def solve_find_parameter(instance: Instance) -> Solution:
+    """Write your code here
+
+    Args:
+        instance (Instance): An Instance object containing all you need to solve the problem
+
+    Returns:
+        Solution: A solution object initialized with an iterator on Edge object
+    """
+
+    best_solution = None
+    best_revenue = -1
+    time_before = time.time()
+    search_time = 1
+
+    results = []
+    best_results = {}
+
+    temps = [100 * (2 ** i) for i in range(20)]
+    cooling_rates = [0.8, 0.85, 0.9, 0.95, 0.975, 0.99, 0.995, 0.999, 0.9999, 0.99999, 0.999999, 0.9999999]
+    tabu_iteration_lengths = [2, 4, 8, 16, 32, 64]
+
+
+    for temp in temps:
+        for cooling_rate in cooling_rates:
+            for tabu_iteration_length in tabu_iteration_lengths:
+                time_before = time.time()
+                best_solver = None
+                while time_before + search_time > time.time():
+                    solver = SolverAdvanced(instance)
+                    solver.solve_profit_nodes_simulated_annealing(temp, cooling_rate, tabu_iteration_length)
+                    if solver.best_revenue > best_revenue:
+                        best_solution = solver.best_edge_solution
+                        best_revenue = solver.best_revenue
+                        best_solver = solver
+
+                result = (instance.filepath.name, solver.best_revenue, temp, cooling_rate, tabu_iteration_length, solver.max_cost, time.time() - time_before)
+                results.append(result)
+
+                if instance.filepath.name not in best_results or best_results[instance.filepath.name][1] < solver.best_revenue:
+                    best_results[instance.filepath.name] = result
+
+                print(result[0], "Revenue: " + str(result[1]), "Temp: " + str(result[2]), "cooling_rate: " + str(result[3]), "Tabu_Length: " + str(result[4]), "Time: " + str(result[6]))
+
+
+    #for result in results:
+        #print(result[0], "Revenue: " + str(result[1]), "Temp: " + str(result[2]), "cooling_rate: " + str(result[3]), "Tabu_Length: " + str(result[4]))
+
+    print("BEST RESULTS")
+    print("***********************************************************")
+    print(best_results)
+
+    with open('results'+instance.filepath.name+'.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        for result in sorted(results, key=lambda x: x[1], reverse=True):
+            writer.writerow([result[0], "Revenue: " + str(result[1]), "Temp: " + str(result[2]), "cooling_rate: " + str(result[3]), "Tabu_Length: " + str(result[4]), "Time: " + str(result[6])])
 
     return Solution(best_solution)
