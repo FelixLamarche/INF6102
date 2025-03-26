@@ -93,7 +93,7 @@ class SolverAdvanced:
         Solves the problem by trying to add and remove profit nodes by adding all the missing node and edges to reach them
         Tries to pick the profit node which adds the most revenue, or can randomly add a or remove a profit node
             Simulated Annealing Version
-            Gets around 5.5/8.0 on the test instances, and is slow
+            Gets around 7.2/8.0 on the test instances, and is slow
         """
         self.init_solution_empty()
 
@@ -199,8 +199,6 @@ class SolverAdvanced:
             cur_iteration_change += 1
             nb_iteration += 1
 
-            #self.visualize_solution(Solution(self.edges_solution), nb_iteration)
-            #print(nb_iteration, self.revenue, self.cost, temp)
             # Only cool down if we have changed the solution
             if chosen_revenue_node is not None:
                 cur_iteration_change = 0
@@ -216,17 +214,13 @@ class SolverAdvanced:
                 cur_iteration_amelioration = 0
                 self.best_edge_solution = self.edges_solution.copy()
                 self.best_revenue = self.revenue
-                #print(self.revenue)
             
-        #print("Final revenue: " + str(self.revenue), "Final cost: " + str(self.cost), "Final iteration: " + str(nb_iteration))
-        #print("temp:" + str(temp), "cur_iteration:" + str(cur_iteration_amelioration))
-
     def solve_profit_nodes_hill_climb(self):
         """
         Solves the problem by looking at profit nodes and adding all of the edges and nodes to reach them
         Each iteration, adds the profit node (with all the edges and nodes to reach them) that has the best revenue/cost ratio
             Hill Climbing Version
-            Gets around 5.25/8.0 on the test instances, and is quick
+            Gets around 6.94/8.0 on the test instances, and is quick
         """
         self.init_solution_empty()
 
@@ -296,34 +290,34 @@ class SolverAdvanced:
         if node in self.nodes_solution:
             return list()
         
-        queue = [(0, node, None)]
+        # Dist, Cost, Node, Edge
+        queue = [(0, 0, node, None)]
         visited_nodes = dict()
         connected_element = None # First node found in the solution
-        while len(queue) > 0 and connected_element is None:
+        while len(queue) > 0:
             cur_element = queue.pop(0)
-            dist, current_node, prev_edge = cur_element
-            if current_node.idx() in visited_nodes:
+            dist, cur_cost, current_node, prev_edge = cur_element
+            if current_node.idx() in visited_nodes and visited_nodes[current_node.idx()][1] <= cur_cost:
                 continue
-
-            visited_nodes[current_node.idx()] = (dist, current_node, prev_edge)
+                
+            visited_nodes[current_node.idx()] = (dist, cur_cost, current_node, prev_edge)
 
             for edge in self.node_edges[current_node.idx()]:
                 other_node = self.get_other_node_of_edge(edge, current_node)
+                new_element = (dist + 1, edge.cost() + cur_cost, other_node, edge)
                 if other_node in self.nodes_solution:
-                    connected_element = (dist + 1, other_node, edge)
-                    visited_nodes[other_node.idx()] = connected_element
-                    break
-                else:
-                    queue.append((dist + 1, other_node, edge))
+                    if connected_element == None or (new_element[0] <= connected_element[0] and new_element[1] < connected_element[1]):
+                        connected_element = new_element
+                        visited_nodes[other_node.idx()] = new_element
+                elif connected_element == None or (new_element[0] < connected_element[0] and new_element[1] <= connected_element[1]):
+                    queue.append((dist + 1, edge.cost() + cur_cost, other_node, edge))
         
         # Reconstruct the path
         path = list()
         max_dist = connected_element[0]
-
-        prev_dist, prev_node, prev_edge = connected_element
-        #path.append((max_dist - connected_element[0], prev_node, prev_edge))
+        prev_dist, prev_cost, prev_node, prev_edge = connected_element
         while True:
-            dist, node, edge = visited_nodes[prev_node.idx()]
+            dist, cost, node, edge = visited_nodes[prev_node.idx()]
             dist = max_dist - dist # The distance is reversed, to get the distance from the node in the solution and not the profit node
             path.append((dist, node, edge))
 
