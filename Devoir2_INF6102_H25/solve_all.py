@@ -21,6 +21,8 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     for instance_file in os.listdir('./instances'):
+        if instance_file.startswith("trivial"):
+            continue
         instance_dir_file = './instances/' + instance_file
 
         instance = Instance(instance_dir_file)
