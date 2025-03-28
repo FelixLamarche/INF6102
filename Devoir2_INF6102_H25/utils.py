@@ -51,6 +51,8 @@ class Edge:
     def __init__(self,n1: Node,n2: Node, cost=0):
         self.__idx = frozenset((n1,n2))
         self.__cost = cost
+        ## Added
+        self.__previous_cost = 0
     
     def idx(self):
         return self.__idx
@@ -72,6 +74,14 @@ class Edge:
 
     def __repr__(self):
         return 'Edge'+str(['idx:'+str(tuple(self.__idx)),'cost:'+str(self.__cost)])
+    
+    # Added
+    def set_new_cost(self, new_cost) :
+        self.__previous_cost = self.__cost
+        self.__cost = new_cost
+
+    def set_back_old_cost(self) :
+        self.__cost = self.__previous_cost
 
 class Solution:
     def __init__(self, path: Iterable[Edge]):

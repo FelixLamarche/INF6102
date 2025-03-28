@@ -54,156 +54,12 @@ class SolverAdvanced:
 
         self.dists_to_root = {} # Distance to the root node in the current solution
         self.fill_nodes_dist_to_root()
-
-
-    def solve_profit_nodes_simulated_annealing(self, temp: int = 10000, cooling_rate: float = 0.99, tabu_iteration_length: int = 4):
-        """
-        Solves the problem by trying to add and remove profit nodes by adding all the missing node and edges to reach them
-        Tries to pick the profit node which adds the most revenue, or can randomly add a or remove a profit node
-            Simulated Annealing Version
-            Gets around 7.5/8.0 on the test instances, and is slow
-        """
-        temp = self.instance.N * 250
-
-        # Remove a random amount of profit nodes to get a more diverse starting solution
-        profit_nodes = list(self.nodes_solution.intersection(self.revenue_nodes.values()))
-        if len(profit_nodes) > 1:
-            nb_profit_node_to_remove = random.randint(0, len(profit_nodes) - 1) # -1 to keep root node
-            self.remove_amount_of_profit_nodes(nb_profit_node_to_remove)
-
-        #self.visualize_solution(Solution(self.edges_solution), 0)
-
-        nb_iterations_before_amelioration = 1500
-        nb_iterations_before_change = 100
-        cur_iteration_amelioration = 0
-        cur_iteration_change = 0
-        nb_iteration = 0
-        prev_revenue = -1
-
-        tabu_dict = dict()
-
-        while self.has_time_left() and (cur_iteration_amelioration < nb_iterations_before_amelioration and cur_iteration_change < nb_iterations_before_change):
-            do_remove_node = False
-            chosen_revenue_node = None
-            chosen_revenue = 0
-            chosen_cost = 0
-            chosen_path = list()
-            chosen_nodes = list()
-            chosen_edges = list()
-
-            revenue_nodes_idx = list(self.revenue_nodes.keys())
-            random.shuffle(revenue_nodes_idx)
-            for profit_node_idx in revenue_nodes_idx:
-                profit_node = self.revenue_nodes[profit_node_idx]
-
-                # If the profit node is too far from the root
-                if self.min_dists_to_root[profit_node.idx()] > self.max_distance:
-                    continue
-                if profit_node == self.instance.get_root():
-                    continue
-                # If the profit node is in the tabu list
-                if profit_node.idx() in tabu_dict and tabu_dict[profit_node.idx()] > 0:
-                    continue
-
-                if profit_node in self.nodes_solution: # Check to remove the node
-                    # If the the node has more than one edge in the solution, we don't try to remove it (as it would remove more than one profit node at a time)
-                    if len(self.node_edges[profit_node.idx()].intersection(self.edges_solution)) > 1:
-                        continue
-
-                    nodes_to_remove, edges_to_remove = self.get_path_to_remove_node(profit_node)
-                    if len(nodes_to_remove) == 0:
-                        continue
-
-                    difference_revenue = -sum(node.revenue() for node in nodes_to_remove if node.idx() in self.revenue_nodes)
-                    # Annealing check as removing a node always degrades our current solution
-                    if self.probability_annealing(temp, self.revenue + difference_revenue, self.revenue):
-                        chosen_revenue_node = profit_node
-                        chosen_revenue = difference_revenue
-                        chosen_cost = -sum(edge.cost() for edge in edges_to_remove)
-                        chosen_nodes = nodes_to_remove
-                        chosen_edges = edges_to_remove
-                        do_remove_node = True
-                        # Stop searching after finding a node to remove
-                        break
-                else: # Node is not already in the solution
-                    path = self.get_additional_path_to_node(profit_node)
-                    node_in_solution = path[0][1] # The first element in the path is a node in the solution, the last is the profit node
-                    new_nodes = set(node for dist, node, edge in path[1:])
-                    new_edges = set(edge for dist, node, edge in path[0:-1])
-
-                    additional_cost = sum(edge.cost() for edge in new_edges if edge)
-                    if additional_cost + self.cost > self.max_cost:
-                        continue
-
-                    additional_dist_to_root = self.dists_to_root[node_in_solution.idx()] 
-                    dist_to_solution = path[-1][0] # The last element in the path is the final profit node
-                    if dist_to_solution + additional_dist_to_root > self.max_distance:
-                        continue
-
-                    additional_revenue = sum(node.revenue() for node in new_nodes if node.idx() in self.revenue_nodes)
-                    if additional_revenue > chosen_revenue:
-                        chosen_revenue_node = profit_node
-                        chosen_revenue = additional_revenue
-                        chosen_cost = additional_cost
-                        chosen_path = path
-                        chosen_nodes = new_nodes
-                        chosen_edges = new_edges
-                        do_remove_node = False
-                        # If a neighbor is better than the current solution, we add it and stop searching
-                        break
             
-            # Add node to the solution with its path
-            if chosen_revenue_node is not None and not do_remove_node:
-                # Update distances to root
-                additional_dist_to_root = self.dists_to_root[chosen_path[0][1].idx()] # The first element in the path is a node in the solution
-                for dist, node, edge in chosen_path:
-                    self.dists_to_root[node.idx()] = min(self.dists_to_root[node.idx()], additional_dist_to_root + dist)
-                self.edges_solution.update(chosen_edges)
-                self.nodes_solution.update(chosen_nodes)
-
-                self.cost += chosen_cost
-                self.revenue += chosen_revenue
-            elif do_remove_node and chosen_revenue_node is not None:
-                # Remove the nodes from the solution
-                self.edges_solution.difference_update(chosen_edges)
-                for node in chosen_nodes:
-                    self.dists_to_root[node.idx()] = 999999
-                self.nodes_solution.difference_update(chosen_nodes)
-
-                self.cost += chosen_cost
-                self.revenue += chosen_revenue
-
-            # Update tabu list
-            for node_idx in tabu_dict.keys():
-                tabu_dict[node_idx] -= 1
-
-            cur_iteration_amelioration += 1
-            cur_iteration_change += 1
-            nb_iteration += 1
-
-            # Only cool down if we have changed the solution
-            if chosen_revenue_node is not None:
-                cur_iteration_change = 0
-                temp = temp * cooling_rate
-                tabu_dict[chosen_revenue_node.idx()] = tabu_iteration_length
-
-            prev_revenue = self.revenue
-            if self.revenue > self.best_revenue:
-                print("Iteration: ", nb_iteration, "Revenue: ", self.revenue, "Cost: ", self.cost, "Temp: ", temp, "Time: ", time.time() - self.time_before)
-                cur_iteration_amelioration = 0
-                self.best_edge_solution = self.edges_solution.copy()
-                self.best_node_solution = self.nodes_solution.copy()
-                self.best_revenue = self.revenue
-
-        print("STOP Iteration: ", nb_iteration, "Best Revenue: ", self.best_revenue, "Revenue: ", self.revenue, "Cost: ", self.cost, "Temp: ", temp, "Time: ", time.time() - self.time_before)
-        print("\n")
-            
-    def solve_profit_nodes_local_search(self) :
+    def local_search(self) :
 
         # Solution initiale
-        self.solve_profit_nodes_greedy()
-        best_edges_solution = self.best_edge_solution
-        best_nodes_solution = self.best_node_solution
+        self.solve_greedy()
+        best_solution = self.best_edge_solution.copy()
         best_revenue = self.best_revenue
         print(f"INITIAL REVENUE : {best_revenue}")
 
@@ -219,23 +75,22 @@ class SolverAdvanced:
             edge_to_block.set_new_cost(1e10) #Block edge
 
             # Compute new solution
-            self.solve_profit_nodes_greedy()
+            # self.solve_greedy()
+            self.solve_greedy_randomized()
             print(i)
             
             if self.best_revenue > best_revenue :
                 improved = True
-                best_edges_solution = self.best_edge_solution
-                best_nodes_solution = self.best_node_solution
+                best_solution = self.best_edge_solution.copy()
                 best_revenue = self.best_revenue
                 print(f"SOLUTION AMELIORANTE TROUVEE, new revenue {self.best_revenue}")
 
             edge_to_block.set_back_old_cost()
 
-        self.best_edge_solution = best_edges_solution
-        self.best_node_solution = best_nodes_solution
+        self.best_edge_solution = best_solution
         self.best_revenue = best_revenue
 
-    def solve_profit_nodes_greedy(self):
+    def solve_greedy(self):
         """
         Solves the problem by looking at profit nodes and adding all of the edges and nodes to reach them
         Each iteration, adds the profit node (with all the edges and nodes to reach them) that has the best revenue/cost ratio
@@ -303,10 +158,86 @@ class SolverAdvanced:
         self.best_edge_solution = self.edges_solution.copy()
         self.best_node_solution = self.nodes_solution.copy()
 
+    def solve_greedy_randomized(self, alpha=0.2) :
+        """
+        Solves the problem by looking at profit nodes and adding all of the edges and nodes to reach them
+        Each iteration, adds the profit node (with all the edges and nodes to reach them) that has the best revenue/cost ratio pondered with alpha
+        """
+        self.init_solution_empty()
+
+        prev_revenue = -1
+        while self.revenue > prev_revenue:
+            prev_revenue = self.revenue
+
+            costs = {}
+            revenues = {}
+            revenues_costs_ratios = {}
+            paths = {}
+            best_ratio = 0
+            worst_ratio = 1e10
+
+            revenue_nodes_idx = list(self.revenue_nodes.keys())
+            random.shuffle(revenue_nodes_idx)
+            for profit_node_idx in revenue_nodes_idx:
+                profit_node = self.revenue_nodes[profit_node_idx]
+                if profit_node in self.nodes_solution or self.min_dists_to_root[profit_node.idx()] > self.max_distance:
+                    continue
+
+                path = self.get_additional_path_to_node(profit_node)
+                node_in_solution = path[0][1] # The first element in the path is a node in the solution, the last is the profit node
+                new_nodes = set(node for dist, node, edge in path[1:])
+                new_edges = set(edge for dist, node, edge in path[0:-1])
+
+                additional_cost = sum(edge.cost() for edge in new_edges if edge)
+                if additional_cost + self.cost > self.max_cost:
+                    continue
+
+                additional_dist_to_root = self.dists_to_root[node_in_solution.idx()] 
+                dist_to_solution = path[-1][0] # The last element in the path is the final profit node
+                if dist_to_solution + additional_dist_to_root > self.max_distance:
+                    continue
+
+                additional_revenue = sum(node.revenue() for node in new_nodes if node.idx() in self.revenue_nodes)
+                revenue_cost_ratio = additional_revenue / additional_cost
+
+                revenues[profit_node] = additional_revenue
+                costs[profit_node] = additional_cost
+                revenues_costs_ratios[profit_node] = revenue_cost_ratio
+                paths[profit_node] = path
+
+                if revenue_cost_ratio > best_ratio:
+                    best_ratio = revenue_cost_ratio
+                if revenue_cost_ratio < worst_ratio :
+                    worst_ratio = revenue_cost_ratio
+
+            # Building candidate list and chosing a node randomly from it
+            chosen_node = None
+            RCL = []
+            for profit_node in revenues_costs_ratios :
+                if revenues_costs_ratios[profit_node] >= best_ratio - alpha*(best_ratio - worst_ratio) :
+                    RCL.append(profit_node)
+            if RCL :
+                chosen_node = np.random.choice(RCL)
+
+            # Add node to the solution with its path
+            if chosen_node :
+                best_path = paths[chosen_node]
+                # Update distances to root
+                additional_dist_to_root = self.dists_to_root[best_path[0][1].idx()] # The first element in the path is a node in the solution
+                for dist, node, edge in best_path:
+                    self.nodes_solution.add(node)
+                    if edge :
+                        self.edges_solution.add(edge)
+                    self.dists_to_root[node.idx()] = min(self.dists_to_root[node.idx()], additional_dist_to_root + dist)
+
+                self.cost += costs[chosen_node]
+                self.revenue += revenues[chosen_node]
+
+        self.best_revenue = self.revenue
+        self.best_edge_solution = self.edges_solution.copy()
+        self.best_node_solution = self.nodes_solution.copy()
+
     def get_leaves_and_edges(self) :
-        """
-        Returns all leaves in the current solution and the edge connecting it to the solution
-        """
 
         leaves_and_edges = set()
         
@@ -330,26 +261,6 @@ class SolverAdvanced:
                         break 
 
         return leaves_and_edges
-
-    def destroy_and_reconstruct_edges(self):
-        """Destroys the current solution by removing all the edges
-        DOES NOT WORK PROPERLY"""
-
-        nodes = list(self.nodes_solution)
-        random.shuffle(nodes)
-
-        self.edges_solution = set()
-        self.nodes_solution = set()
-        self.nodes_solution.add(self.instance.get_root())
-        self.revenue = self.instance.get_root().revenue()
-        self.cost = 0
-
-        for node in nodes:
-            path = self.get_additional_path_to_node(node)
-            self.edges_solution.update(edge for dist, node, edge in path[0:-1])
-            self.nodes_solution.update(node for dist, node, edge in path[1:])
-            self.cost += sum(edge.cost() for dist, node, edge in path[0:-1])
-            self.revenue += sum(node.revenue() for dist, node, edge in path[1:] if node.idx() in self.revenue_nodes)
 
     def remove_amount_of_profit_nodes(self, nb_profit_nodes_to_remove: int):
         MAX_ITERATION = 250
@@ -632,84 +543,6 @@ class SolverAdvanced:
         plt.savefig("visualization_"+str(iter)+".png")
 
 
-    ######################
-    ### OLD FUNCTIONS
-    ######################
-
-    def solve_edges(self):
-        """
-        Solves the problem by adding the best edges (that add the most profit) to the solution
-        N.B. Does not work well
-        """
-        self.init_solution_empty()
-
-        queue = [(0, self.instance.get_root())]
-        while len(queue) > 0:
-            distance, current_node = queue.pop(0)
-
-            if distance > self.max_distance:
-                continue
-            
-            # Get the best edges in profit
-            best_edges = self.get_best_edges_neighboring_edge(current_node, self.cost, self.edges_solution)
-            if len(best_edges) == 0:
-                continue
-
-            # Choose the best edge
-            best_edges = list(best_edges)
-            best_edges.sort(key=lambda edge: edge.cost())
-            best_edge = random.choice(best_edges)
-
-            if best_edge.cost() + self.cost > self.max_cost:
-                continue
-            
-            # Update queue
-            # Re-add the current node as we added an edge from it
-            queue.append((distance, current_node))
-            # Add the connected node to the queue
-            connected_node = self.get_other_node_of_edge(best_edge, current_node)
-            queue.append((distance + 1, connected_node))
-
-            # Add the edge to the solution
-            self.edges_solution.add(best_edge)
-            self.nodes_solution.add(current_node)
-            self.cost += best_edge.cost()
-            self.revenue += self.get_edge_revenue(best_edge, current_node)
-
-    def get_best_edges_neighboring_edge(self, node: Node, cur_cost: int, edges_used: set[Edge]) -> set[Edge]:
-        """
-        Returns the edges connected to the node that are not in the solution and that can be added to the solution
-        which increases the profit the most
-        N.B. Does not work properly
-        """
-        best_edges = set()
-        best_edge_profit = 0
-
-        for edge in self.node_edges[node.idx()]:
-            if edge in edges_used:
-                continue
-
-            # If the edge is already in the solution
-            if len(edge.idx().intersection(self.nodes_solution)) == 2:
-                continue
-
-            if edge.cost() + cur_cost <= self.max_cost:
-                edge_profit = self.get_edge_revenue(edge, node)
-                if edge_profit > best_edge_profit:
-                    best_edges = set()
-                    best_edges.add(edge)
-                    best_edge_profit = edge_profit
-                elif edge_profit == best_edge_profit:
-                    best_edges.add(edge)
-
-        return best_edges
-    
-    def get_edge_revenue(self, edge: Edge, connected_node: Node) -> int:
-        """Returns the added profit of the edge with the connected_node already in the solution"""
-        other_idx = self.get_other_node_of_edge(edge, connected_node).idx()
-        return self.revenue_nodes[other_idx].revenue() if other_idx in self.revenue_nodes else 0
-    
-
     
 def solve(instance: Instance) -> Solution:
     """Write your code here
@@ -722,7 +555,7 @@ def solve(instance: Instance) -> Solution:
     """
 
     ### TO MODIFY
-    SEARCH_TIME_SEC = 250
+    SEARCH_TIME_SEC = 30
     ###
     TIME_MARGIN_SEC = 5
 
@@ -732,21 +565,34 @@ def solve(instance: Instance) -> Solution:
 
     time_before = time.time()
     time_limit = time_before + SEARCH_TIME_SEC - TIME_MARGIN_SEC
+
+    time_left = time_limit - time.time()
+    solver = SolverAdvanced(instance, time_left)
+    # solver.solve_greedy()
+    # solver.solve_greedy_randomized()
+    solver.local_search()
+    best_edge_solution = solver.best_edge_solution.copy()
+
     while time.time() < time_limit:
         time_left = time_limit - time.time()
-        if best_edge_solution is None:
-            solver = SolverAdvanced(instance, time_left)
-            # solver.solve_profit_nodes_greedy()
-            solver.solve_profit_nodes_local_search() 
-            #solver.solve_profit_nodes_simulated_annealing()
-        else:
-            solver = SolverAdvanced(instance, time_left, best_edge_solution, best_node_solution)
-            # solver.solve_profit_nodes_greedy()
-            solver.solve_profit_nodes_simulated_annealing()
+        solver.local_search()
         if solver.best_revenue > best_revenue:
             best_edge_solution = solver.best_edge_solution.copy()
             best_node_solution = solver.best_node_solution.copy()
             best_revenue = solver.best_revenue
+        # if best_edge_solution is None:
+        #     solver = SolverAdvanced(instance, time_left)
+        #     solver.solve_greedy_randomized()
+        #     # solver.solve_profit_nodes_hill_climb() 
+        #     # solver.solve_profit_nodes_simulated_annealing()
+        # else:
+        #     solver = SolverAdvanced(instance, time_left, best_edge_solution, best_node_solution)
+        #     solver.solve_greedy_randomized()
+        #     # solver.solve_profit_nodes_simulated_annealing()
+        # if solver.best_revenue > best_revenue:
+        #     best_edge_solution = solver.best_edge_solution.copy()
+        #     best_node_solution = solver.best_node_solution.copy()
+        #     best_revenue = solver.best_revenue
 
     return Solution(best_edge_solution)
 
