@@ -205,29 +205,20 @@ class SolverAdvanced:
         best_edges_solution = self.best_edge_solution
         best_nodes_solution = self.best_node_solution
         best_revenue = self.best_revenue
-        print(f"INITIAL REVENUE : {best_revenue}")
 
-        improved = True
-        # while improved :
-        improved = False
         leaves_and_edges = self.get_leaves_and_edges()
-        print(f'nb to test : {len(leaves_and_edges)}')
 
-        i=0
         for leaf, edge_to_block in leaves_and_edges :
-            i+=1
             edge_to_block.set_new_cost(1e10) #Block edge
 
             # Compute new solution
             self.solve_profit_nodes_greedy()
-            print(i)
             
             if self.best_revenue > best_revenue :
                 improved = True
                 best_edges_solution = self.best_edge_solution
                 best_nodes_solution = self.best_node_solution
                 best_revenue = self.best_revenue
-                print(f"SOLUTION AMELIORANTE TROUVEE, new revenue {self.best_revenue}")
 
             edge_to_block.set_back_old_cost()
 
