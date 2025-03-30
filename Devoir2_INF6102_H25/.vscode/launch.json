@@ -10,7 +10,7 @@
         "request": "launch",
         "program": "main.py",
         "console": "integratedTerminal",
-        "args": ["--agent=advanced", "--infile=instances/trivial.txt"]
+        "args": ["--agent=advanced", "--infile=instances/instance_B_100_200_25_103_12.txt"]
       }
     ]
   }
