@@ -331,26 +331,6 @@ class SolverAdvanced:
 
         return leaves_and_edges
 
-    def destroy_and_reconstruct_edges(self):
-        """Destroys the current solution by removing all the edges
-        DOES NOT WORK PROPERLY"""
-
-        nodes = list(self.nodes_solution)
-        random.shuffle(nodes)
-
-        self.edges_solution = set()
-        self.nodes_solution = set()
-        self.nodes_solution.add(self.instance.get_root())
-        self.revenue = self.instance.get_root().revenue()
-        self.cost = 0
-
-        for node in nodes:
-            path = self.get_additional_path_to_node(node)
-            self.edges_solution.update(edge for dist, node, edge in path[0:-1])
-            self.nodes_solution.update(node for dist, node, edge in path[1:])
-            self.cost += sum(edge.cost() for dist, node, edge in path[0:-1])
-            self.revenue += sum(node.revenue() for dist, node, edge in path[1:] if node.idx() in self.revenue_nodes)
-
     def remove_amount_of_profit_nodes(self, nb_profit_nodes_to_remove: int):
         MAX_ITERATION = 250
         
@@ -462,47 +442,6 @@ class SolverAdvanced:
 
         return nodes_to_remove, edges_to_remove
 
-    def get_path_to_remove_node2(self, node: Node) -> tuple[set[Node], set[Edge]]:
-        """
-        Returns all the nodes and edges that should be removed to remove the target node from the solution
-        Including the nodes that are disconnected from the root node, and the edges that are disconnected from the solution
-        and the nodes that are with no profits that that aren't necessary to reahch any profit node
-        N.B. Is slower than the other method
-        """
-        removed_node_edges = set()
-        for edge in self.node_edges[node.idx()]:
-            if edge in self.edges_solution:
-                removed_node_edges.add(edge)
-
-        # Remove the node to ease the search
-        nodes_to_remove, edges_to_remove = self.get_path_to_remove_node(node)
-
-        self.nodes_solution.difference_update(nodes_to_remove)
-        self.edges_solution.difference_update(edges_to_remove)
-
-        kept_edges = set()
-        kept_nodes = set()
-
-        queue = [self.instance.get_root()]
-        while len(queue) > 0:
-            cur_node = queue.pop(0)
-            kept_nodes.add(cur_node)
-            for edge in self.node_edges[cur_node.idx()]:
-                if edge in self.edges_solution:
-                    kept_edges.add(edge)
-                    other_node = self.get_other_node_of_edge(edge, cur_node)
-                    if other_node not in kept_nodes:
-                        queue.append(other_node)
-
-        # Re-add the node to not modify the solution
-        self.nodes_solution.update(nodes_to_remove)
-        self.edges_solution.update(edges_to_remove)
-
-        to_remove_nodes = self.nodes_solution.difference(kept_nodes)
-        to_remove_edges = self.edges_solution.difference(kept_edges)
-
-        return to_remove_nodes, to_remove_edges
-
     def probability_annealing(self, temp: float, new_revenue: int, cur_revenue: int) -> bool:
         """Returns True if we should accept the new revenue according to the simulated annealing probability"""
         if new_revenue > cur_revenue:
@@ -567,149 +506,8 @@ class SolverAdvanced:
 
         self.fill_nodes_dist_to_root()
     
-    def init_solution_full(self):
-        """Initializes the solution with all edges"""
-        self.edges_solution = set(edge for edge in self.instance.edges)
-        self.cost = sum(edge.cost() for edge in self.edges_solution)
-
     def has_time_left(self) -> bool:
         return time.time() < self.time_limit
-
-    ######################
-    ### UTILITIES
-    ######################
-
-    def visualize_solution(self, sol: Solution, iter: int):
-        """
-            Show and save the solution's visualization
-        """
-        figure_size = (18,14) 
-
-        G = nx.Graph()
-        G.add_nodes_from([n for n in self.instance.nodes.values()])
-        G.add_edges_from([e.idx() for e in self.instance.edges])
-        pos = nx.bfs_layout(G, self.instance.get_root(), align="horizontal")
-        pos[self.instance.get_root()] = (0,0)
-        if len(self.instance.edges) >= 1000:
-            k = 15/np.sqrt(len(G.nodes()))
-        else:
-            k = 6/np.sqrt(len(G.nodes()))
-        pos = nx.spring_layout(G, k=k, pos=pos, fixed=[self.instance.get_root()], seed=38206, scale=10)
-        # Nodes colored by cluster
-        fig, _ = plt.subplots(figsize=figure_size)
-
-        # nx.draw(G, pos=pos, ax=ax)
-        nx.draw_networkx_nodes(G, pos, [self.instance.get_root()], node_shape="s", node_color="red", node_size=750)
-        nx.draw_networkx_nodes(G, pos, set(self.instance.profit_nodes.values()).difference((self.instance.get_root(),)), node_shape="v", node_color="orange", node_size=500)
-        nx.draw_networkx_nodes(G, pos, {n for n in self.instance.nodes.values()}.difference(self.instance.profit_nodes.values()),)
-        
-        path = list(map(lambda x: tuple(x.idx()),sol.get_path()))
-        nx.draw_networkx_edges(G, pos, path)
-
-        node_labels: dict[Node, str] = {}
-        edge_labels: dict[tuple[Node,Node], str] = {}
-        for edge in sol.get_path():
-            edge_labels[tuple(edge.idx())] = edge.cost()
-            for node in edge.idx():
-                if node.revenue() > 0:
-                    node_labels[node] = str(node.revenue())
-                else:
-                    node_labels[node] = ""
-
-        nx.draw_networkx_labels(G, pos, node_labels)
-        nx.draw_networkx_edge_labels(G, pos, edge_labels)
-
-
-        multi_path = self.instance.break_path(sol.get_path())
-        colors = self.instance.generate_distinct_colors(len(multi_path))
-        for i_path, color in zip(multi_path, colors): 
-            nx.draw_networkx_edges(G, pos, i_path, edge_color=color, width=15, alpha=0.5)
-
-        revenu = self.instance.solution_value(sol)
-        consummed = self.instance.solution_cost(sol)
-        fig.suptitle(f"Solution de {self.instance.filepath.stem}\nBudget consommé = {consummed}, Revenu = {revenu}", fontsize=18)
-        fig.tight_layout()
-        plt.savefig("visualization_"+str(iter)+".png")
-
-
-    ######################
-    ### OLD FUNCTIONS
-    ######################
-
-    def solve_edges(self):
-        """
-        Solves the problem by adding the best edges (that add the most profit) to the solution
-        N.B. Does not work well
-        """
-        self.init_solution_empty()
-
-        queue = [(0, self.instance.get_root())]
-        while len(queue) > 0:
-            distance, current_node = queue.pop(0)
-
-            if distance > self.max_distance:
-                continue
-            
-            # Get the best edges in profit
-            best_edges = self.get_best_edges_neighboring_edge(current_node, self.cost, self.edges_solution)
-            if len(best_edges) == 0:
-                continue
-
-            # Choose the best edge
-            best_edges = list(best_edges)
-            best_edges.sort(key=lambda edge: edge.cost())
-            best_edge = random.choice(best_edges)
-
-            if best_edge.cost() + self.cost > self.max_cost:
-                continue
-            
-            # Update queue
-            # Re-add the current node as we added an edge from it
-            queue.append((distance, current_node))
-            # Add the connected node to the queue
-            connected_node = self.get_other_node_of_edge(best_edge, current_node)
-            queue.append((distance + 1, connected_node))
-
-            # Add the edge to the solution
-            self.edges_solution.add(best_edge)
-            self.nodes_solution.add(current_node)
-            self.cost += best_edge.cost()
-            self.revenue += self.get_edge_revenue(best_edge, current_node)
-
-    def get_best_edges_neighboring_edge(self, node: Node, cur_cost: int, edges_used: set[Edge]) -> set[Edge]:
-        """
-        Returns the edges connected to the node that are not in the solution and that can be added to the solution
-        which increases the profit the most
-        N.B. Does not work properly
-        """
-        best_edges = set()
-        best_edge_profit = 0
-
-        for edge in self.node_edges[node.idx()]:
-            if edge in edges_used:
-                continue
-
-            # If the edge is already in the solution
-            if len(edge.idx().intersection(self.nodes_solution)) == 2:
-                continue
-
-            if edge.cost() + cur_cost <= self.max_cost:
-                edge_profit = self.get_edge_revenue(edge, node)
-                if edge_profit > best_edge_profit:
-                    best_edges = set()
-                    best_edges.add(edge)
-                    best_edge_profit = edge_profit
-                elif edge_profit == best_edge_profit:
-                    best_edges.add(edge)
-
-        return best_edges
-    
-    def get_edge_revenue(self, edge: Edge, connected_node: Node) -> int:
-        """Returns the added profit of the edge with the connected_node already in the solution"""
-        other_idx = self.get_other_node_of_edge(edge, connected_node).idx()
-        return self.revenue_nodes[other_idx].revenue() if other_idx in self.revenue_nodes else 0
-    
-
     
 def solve(instance: Instance) -> Solution:
     """Write your code here
@@ -722,7 +520,7 @@ def solve(instance: Instance) -> Solution:
     """
 
     ### TO MODIFY
-    SEARCH_TIME_SEC = 250
+    SEARCH_TIME_SEC = 290
     ###
     TIME_MARGIN_SEC = 5
 
@@ -749,62 +547,3 @@ def solve(instance: Instance) -> Solution:
             best_revenue = solver.best_revenue
 
     return Solution(best_edge_solution)
-
-def solve_find_parameter(instance: Instance) -> Solution:
-    """Write your code here
-
-    Args:
-        instance (Instance): An Instance object containing all you need to solve the problem
-
-    Returns:
-        Solution: A solution object initialized with an iterator on Edge object
-    """
-
-    best_solution = None
-    best_revenue = -1
-    time_before = time.time()
-    search_time = 1
-
-    results = []
-    best_results = {}
-
-    temps = [100 * (2 ** i) for i in range(20)]
-    cooling_rates = [0.8, 0.85, 0.9, 0.95, 0.975, 0.99, 0.995, 0.999, 0.9999, 0.99999, 0.999999, 0.9999999]
-    tabu_iteration_lengths = [2, 4, 8, 16, 32, 64]
-
-
-    for temp in temps:
-        for cooling_rate in cooling_rates:
-            for tabu_iteration_length in tabu_iteration_lengths:
-                time_before = time.time()
-                best_solver = None
-                while time_before + search_time > time.time():
-                    solver = SolverAdvanced(instance)
-                    solver.solve_profit_nodes_simulated_annealing(temp, cooling_rate, tabu_iteration_length)
-                    if solver.best_revenue > best_revenue:
-                        best_solution = solver.best_edge_solution
-                        best_revenue = solver.best_revenue
-                        best_solver = solver
-
-                result = (instance.filepath.name, solver.best_revenue, temp, cooling_rate, tabu_iteration_length, solver.max_cost, time.time() - time_before)
-                results.append(result)
-
-                if instance.filepath.name not in best_results or best_results[instance.filepath.name][1] < solver.best_revenue:
-                    best_results[instance.filepath.name] = result
-
-                print(result[0], "Revenue: " + str(result[1]), "Temp: " + str(result[2]), "cooling_rate: " + str(result[3]), "Tabu_Length: " + str(result[4]), "Time: " + str(result[6]))
-
-
-    #for result in results:
-        #print(result[0], "Revenue: " + str(result[1]), "Temp: " + str(result[2]), "cooling_rate: " + str(result[3]), "Tabu_Length: " + str(result[4]))
-
-    print("BEST RESULTS")
-    print("***********************************************************")
-    print(best_results)
-
-    with open('results'+instance.filepath.name+'.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        for result in sorted(results, key=lambda x: x[1], reverse=True):
-            writer.writerow([result[0], "Revenue: " + str(result[1]), "Temp: " + str(result[2]), "cooling_rate: " + str(result[3]), "Tabu_Length: " + str(result[4]), "Time: " + str(result[6])])
-
-    return Solution(best_solution)
