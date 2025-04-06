@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 
-def solve_heuristic(eternity_puzzle):
+def solve_heuristic(eternity_puzzle) -> tuple[list[tuple[int, int, int, int]], int]:
     """
     Heuristic solution of the problem
     :param eternity_puzzle: object describing the input

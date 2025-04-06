@@ -205,20 +205,29 @@ class SolverAdvanced:
         best_edges_solution = self.best_edge_solution
         best_nodes_solution = self.best_node_solution
         best_revenue = self.best_revenue
+        print(f"INITIAL REVENUE : {best_revenue}")
 
+        improved = True
+        # while improved :
+        improved = False
         leaves_and_edges = self.get_leaves_and_edges()
+        print(f'nb to test : {len(leaves_and_edges)}')
 
+        i=0
         for leaf, edge_to_block in leaves_and_edges :
+            i+=1
             edge_to_block.set_new_cost(1e10) #Block edge
 
             # Compute new solution
             self.solve_profit_nodes_greedy()
+            print(i)
             
             if self.best_revenue > best_revenue :
                 improved = True
                 best_edges_solution = self.best_edge_solution
                 best_nodes_solution = self.best_node_solution
                 best_revenue = self.best_revenue
+                print(f"SOLUTION AMELIORANTE TROUVEE, new revenue {self.best_revenue}")
 
             edge_to_block.set_back_old_cost()
 
@@ -513,7 +522,7 @@ def solve(instance: Instance) -> Solution:
     ### TO MODIFY
     SEARCH_TIME_SEC = 290
     ###
-
+    
     TIME_MARGIN_SEC = 5
 
     best_edge_solution = None
@@ -526,11 +535,9 @@ def solve(instance: Instance) -> Solution:
         time_left = time_limit - time.time()
         if best_edge_solution is None:
             solver = SolverAdvanced(instance, time_left)
-            try:
-                solver.solve_profit_nodes_local_search() 
-            except Exception as e:
-                solver.solve_profit_nodes_greedy()
-                #solver.solve_profit_nodes_simulated_annealing()
+            # solver.solve_profit_nodes_greedy()
+            solver.solve_profit_nodes_local_search() 
+            #solver.solve_profit_nodes_simulated_annealing()
         else:
             solver = SolverAdvanced(instance, time_left, best_edge_solution, best_node_solution)
             # solver.solve_profit_nodes_greedy()
