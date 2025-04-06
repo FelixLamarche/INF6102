@@ -7,18 +7,13 @@ from solver_heuristic import solve_heuristic
 from utils import *
 
 class LocalSolver:
-    def __init__(self, eternity_puzzle: EternityPuzzle):
+    def __init__(self, eternity_puzzle: EternityPuzzle, initial_solution: list[tuple[int, int, int, int]]):
         self.eternity_puzzle = eternity_puzzle
         self.board_size = eternity_puzzle.board_size
 
-        # Get an initial solution (random)
-        seed = random.randint(1, sys.maxsize)
-        random.seed(seed)
-        print("Seed: ", seed)
-
-        self.solution = self.get_initial_solution_semi_random()
-
-        self.n_conflicts = eternity_puzzle.get_total_n_conflict(self.solution)
+        # Set the initial solution
+        self.solution = initial_solution
+        self.n_conflicts = self.eternity_puzzle.get_total_n_conflict(initial_solution)
 
     def solve(self):
         """
@@ -154,60 +149,59 @@ class LocalSolver:
         chosen_swap = random.choice(best_swaps) # Randomly select one of the best swaps found
         return (chosen_swap.piece2_to_swap, chosen_swap.piece2_coord, chosen_swap.piece1_rotation)
 
-    def get_initial_solution_pseudo_random(self) -> list[tuple[int, int, int, int]]:
-        """
-        Returns an initial solution with pieces randomly placed on the board in a random rotation
-        """
-        piece_list = copy.deepcopy(self.eternity_puzzle.piece_list)
-        random.shuffle(piece_list)
-        for i in range(len(piece_list)):
-            rotations = self.eternity_puzzle.generate_rotation(piece_list[i])
-            piece_list[i] = random.choice(rotations)
 
-        return piece_list
+def get_initial_solution_pseudo_random(eternity_puzzle: EternityPuzzle) -> list[tuple[int, int, int, int]]:
+    """
+    Returns an initial solution with pieces randomly placed on the board in a random rotation
+    """
+    piece_list = copy.deepcopy(eternity_puzzle.piece_list)
+    random.shuffle(piece_list)
+    for i in range(len(piece_list)):
+        rotations = eternity_puzzle.generate_rotation(piece_list[i])
+        piece_list[i] = random.choice(rotations)
 
-    def get_initial_solution_semi_random(self) -> list[tuple[int, int, int, int]]:
-        """
-        Returns an initial solution with pieces randomly placed, but with the edge, corner and internal pieces in their correct placement on the board in a random rotation
-        """
-        piece_list = copy.deepcopy(self.eternity_puzzle.piece_list)
-        corner_pieces = [piece for piece in piece_list if is_corner_piece(piece)]
-        edge_pieces = [piece for piece in piece_list if is_edge_piece(piece)]
-        internal_pieces = [piece for piece in piece_list if not is_corner_piece(piece) and not is_edge_piece(piece)]
-        random.shuffle(corner_pieces)
-        random.shuffle(edge_pieces)
-        random.shuffle(internal_pieces)
-        
-        corner_idx = 0
-        edge_idx = 0
-        internal_idx = 0
-        for x in range(self.board_size):
-            for y in range(self.board_size):
-                idx = get_idx(x, y, self.board_size)
-                if is_corner(x, y, self.board_size):
-                    piece_list[idx] = corner_pieces[corner_idx]
-                    corner_idx += 1
-                elif is_edge(x, y, self.board_size):
-                    piece_list[idx] = edge_pieces[edge_idx]
-                    edge_idx += 1
-                else:
-                    piece_list[idx] = internal_pieces[internal_idx]
-                    internal_idx += 1
-                piece_list[idx] = random.choice(self.eternity_puzzle.generate_rotation(piece_list[idx]))
+    return piece_list
 
-        return piece_list
-
-    def get_initial_solution(self) -> list[tuple[int, int, int, int]]:
-        """
-        Returns an initial solution with the same layout as the input
-        """
-        return copy.deepcopy(self.eternity_puzzle.piece_list)
+def get_initial_solution_semi_random(eternity_puzzle: EternityPuzzle) -> list[tuple[int, int, int, int]]:
+    """
+    Returns an initial solution with pieces randomly placed, but with the edge, corner and internal pieces in their correct placement on the board in a random rotation
+    """
+    piece_list = copy.deepcopy(eternity_puzzle.piece_list)
+    corner_pieces = [piece for piece in piece_list if is_corner_piece(piece)]
+    edge_pieces = [piece for piece in piece_list if is_edge_piece(piece)]
+    internal_pieces = [piece for piece in piece_list if not is_corner_piece(piece) and not is_edge_piece(piece)]
+    random.shuffle(corner_pieces)
+    random.shuffle(edge_pieces)
+    random.shuffle(internal_pieces)
     
-    def get_initial_solution_heuristic(self) -> list[tuple[int, int, int, int]]:
-        return solve_heuristic(self.eternity_puzzle)[0]
+    corner_idx = 0
+    edge_idx = 0
+    internal_idx = 0
+    for x in range(eternity_puzzle.board_size):
+        for y in range(eternity_puzzle.board_size):
+            idx = get_idx(x, y, eternity_puzzle.board_size)
+            if is_corner(x, y, eternity_puzzle.board_size):
+                piece_list[idx] = corner_pieces[corner_idx]
+                corner_idx += 1
+            elif is_edge(x, y, eternity_puzzle.board_size):
+                piece_list[idx] = edge_pieces[edge_idx]
+                edge_idx += 1
+            else:
+                piece_list[idx] = internal_pieces[internal_idx]
+                internal_idx += 1
+            piece_list[idx] = random.choice(eternity_puzzle.generate_rotation(piece_list[idx]))
 
+    return piece_list
 
-    
+def get_initial_solution(eternity_puzzle: EternityPuzzle) -> list[tuple[int, int, int, int]]:
+    """
+    Returns an initial solution with the same layout as the input
+    """
+    return copy.deepcopy(eternity_puzzle.piece_list)
+
+def get_initial_solution_heuristic(eternity_puzzle: EternityPuzzle) -> list[tuple[int, int, int, int]]:
+    return solve_heuristic(eternity_puzzle)[0]
+
 
 def solve_local_search(eternity_puzzle: EternityPuzzle) -> tuple[list[tuple[int, int, int, int]], int]:
     """
@@ -224,10 +218,17 @@ def solve_local_search(eternity_puzzle: EternityPuzzle) -> tuple[list[tuple[int,
 
     time_before = time.time()
     iteration_count = 0
+    
     while time.time() - time_before + TIME_MARGIN_SEC < TIME_SEARCH_SEC:
         iteration_count += 1
 
-        solver = LocalSolver(eternity_puzzle)
+        # Set a seed for the random number generator to get different results each time
+        seed = random.randint(1, sys.maxsize)
+        random.seed(seed)
+        print("Seed: ", seed)
+
+        init_solution = get_initial_solution_semi_random(eternity_puzzle)
+        solver = LocalSolver(eternity_puzzle, init_solution)
         solver.solve()
         if solver.n_conflicts < best_conflict_count:
             best_conflict_count = solver.n_conflicts
