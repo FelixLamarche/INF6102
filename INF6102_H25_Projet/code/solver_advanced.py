@@ -15,7 +15,7 @@ class AdvancedSolver:
         self.solution = initial_solution
         self.n_conflicts = eternity_puzzle.get_total_n_conflict(self.solution)
 
-    def solve(self):
+    def solve(self, time_to_search_sec: float = 60):
         """
         Solves the problem using a local search algorithm, until a local minimum is reached, by doing LKH swaps
         """
@@ -24,22 +24,21 @@ class AdvancedSolver:
         # We repeat this process from different random starts and keep the best solution found
         MIN_CONFLICTS_SOLVED = 1
 
+        time_limit = time.time() + time_to_search_sec
         prev_conflict_count = 9999999
-        print("Conflicts start: ", self.n_conflicts)
-        while prev_conflict_count - self.n_conflicts >= MIN_CONFLICTS_SOLVED:
+        #print("Conflicts start: ", self.n_conflicts)
+        while prev_conflict_count - self.n_conflicts >= MIN_CONFLICTS_SOLVED and time.time() < time_limit:
             prev_conflict_count = self.n_conflicts
-            print("Conflicts: ", self.n_conflicts)
+            #print("Conflicts: ", self.n_conflicts)
             board_positions = [(x, y) for x in range(self.board_size) for y in range(self.board_size)]
             random.shuffle(board_positions)
-
             for x1, y1 in board_positions:
+                if time.time() > time_limit:
+                    break
                 piece1 = get_piece(self.solution, x1, y1, self.board_size)
                 self.do_lkh_swap(x1, y1, piece1)
-                #piece2_to_swap, piece2_to_swap_coord, piece1_rotated = self.get_best_swap(x1, y1, piece1)
-                #if piece2_to_swap is not None:
-                #    self.swap_pieces(x1, y1, piece1_rotated, piece2_to_swap_coord[0], piece2_to_swap_coord[1], piece2_to_swap)
 
-    def solve_best_swaps(self):
+    def solve_best_swaps(self, time_to_search_sec: float = 60):
         """
         Solves the problem using a local search algorithm, until a local minimum is reached
         """
@@ -47,13 +46,16 @@ class AdvancedSolver:
         # We select the best neighbor (the one with the lowest cost) and keep going until we reach a local minimum
         # We repeat this process from different random starts and keep the best solution found
         MIN_CONFLICTS_SOLVED = 1
+        time_limit = time.time() + time_to_search_sec
 
         prev_conflict_count = 9999999
-        while prev_conflict_count - self.n_conflicts >= MIN_CONFLICTS_SOLVED:
+        while prev_conflict_count - self.n_conflicts >= MIN_CONFLICTS_SOLVED and time.time() < time_limit:
             prev_conflict_count = self.n_conflicts
             board_positions = [(x, y) for x in range(self.board_size) for y in range(self.board_size)]
             random.shuffle(board_positions)
             for x1, y1 in board_positions:
+                if time.time() > time_limit:
+                    break
                 piece1 = get_piece(self.solution, x1, y1, self.board_size)
                 piece2_to_swap, piece2_to_swap_coord, piece1_rotated = self.get_best_swap(x1, y1, piece1)
                 if piece2_to_swap is not None:
@@ -239,7 +241,7 @@ def get_initial_solution_heuristic(eternity_puzzle: EternityPuzzle) -> list[tupl
 def shuffle_solution(solution: list[tuple[int, int, int, int]], nb_pieces_to_shuffle: int) -> list[tuple[int, int, int, int]]:
     """
     Copies and shuffles the solution by randomly swapping a specific amount of pieces between each other
-    In essence a destroy and repair method
+    In essence a perturbation method for an iterative local search
     """
     board_size = int(len(solution) ** 0.5)
     positions = [(x, y) for x in range(board_size) for y in range(board_size)]
@@ -265,38 +267,63 @@ def solve_advanced(eternity_puzzle):
     :return: a tuple (solution, cost) where solution is a list of the pieces (rotations applied) and
         cost is the cost of the solution
     """
-    TIME_SEARCH_SEC = 60
+    TIME_SEARCH_SEC = 3600 # Will be 1 hour for the final version
+    TIME_SEARCH_MARGIN = 5 # PUT This to 5 seconds to avoid timing out in the final version
 
-    best_conflict_count = 500
-    best_solution = None
+    NB_ITERATIONS_NO_IMPROVEMENT = 100
+
+    best_solution = None # Best solution found so far
+    best_conflict_count = 999
+    best_solution_cur_search = None # Best solution found in the current search
+    best_conflict_count_cur_search = 999
 
     time_before = time.time()
+    initial_solution = None
     iteration_count = 0
-    while time.time() - time_before < TIME_SEARCH_SEC:
+    iteration_without_improvement = 0
+    while time.time() - time_before < TIME_SEARCH_SEC - TIME_SEARCH_MARGIN:
         time_start_iter = time.time()
-        iteration_count += 1
+        time_to_search = TIME_SEARCH_SEC - (time.time() - time_before) - TIME_SEARCH_MARGIN
 
         # Set a random seed
         seed = random.randint(1, sys.maxsize)
         random.seed(seed)
         #print("Seed: ", seed)
 
-        initial_solution = best_solution
+        # Restart search if no improvement were made
+        if iteration_without_improvement >= NB_ITERATIONS_NO_IMPROVEMENT:
+            best_solution_cur_search = None 
+            best_conflict_count_cur_search = 999
+
+        initial_solution = best_solution_cur_search
+        nb_pieces_to_shuffle = 0
         if initial_solution is None:
             initial_solution = get_initial_solution_heuristic(eternity_puzzle)
         else:
-            percentage_of_shuffle = random.uniform(0.01, 0.12)
+            percentage_of_shuffle = random.uniform(0.01, 0.80)
             nb_pieces_to_shuffle = int(len(initial_solution) * percentage_of_shuffle)
             initial_solution = shuffle_solution(initial_solution, nb_pieces_to_shuffle)
             #print("Shuffled ", nb_pieces_to_shuffle, " pieces")
 
         solver = AdvancedSolver(eternity_puzzle, initial_solution)
-        solver.solve()
+        solver.solve(time_to_search)
+
+        iteration_count += 1
+        iteration_without_improvement += 1
+
+        if solver.n_conflicts < best_conflict_count_cur_search:
+            best_conflict_count_cur_search = solver.n_conflicts
+            best_solution_cur_search = solver.solution
+            iteration_without_improvement = 0
+            #print("NewLocalBest : Iteration:", iteration_count, " time: ", "{:.2f}".format(time.time() - time_before), " best_conflicts: ", best_conflict_count, " conflicts: ", solver.n_conflicts, " time iter: ", "{:.2f}".format(time.time() - time_start_iter), " nb pieces shuffled: ", nb_pieces_to_shuffle)
+
         #print("Conflicts: ", solver.n_conflicts)
         if solver.n_conflicts < best_conflict_count:
             best_conflict_count = solver.n_conflicts
             best_solution = solver.solution
-            print("Iteration:", iteration_count, " time: ", "{:.2f}".format(time.time() - time_before), " best: ", best_conflict_count, " conflicts: ", solver.n_conflicts, " time iter: ", "{:.2f}".format(time.time() - time_start_iter))
+            print("NewGlobalBest: Iteration:", iteration_count, " time: ", "{:.2f}".format(time.time() - time_before), " best_conflicts: ", best_conflict_count, " conflicts: ", solver.n_conflicts, " time iter: ", "{:.2f}".format(time.time() - time_start_iter), " nb pieces shuffled: ", nb_pieces_to_shuffle)
+
+
         if best_conflict_count == 0:
             break
 
