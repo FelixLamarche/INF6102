@@ -1,4 +1,5 @@
 import copy
+import random
 import numpy as np
 
 def solve_heuristic(eternity_puzzle) -> tuple[list[tuple[int, int, int, int]], int]:
@@ -104,6 +105,13 @@ def solve_heuristic(eternity_puzzle) -> tuple[list[tuple[int, int, int, int]], i
             n_conflict += 1
         return n_conflict
     
+    class BestSwap():
+        def __init__(self, idx, piece, piece_rotated, nb_conflicts):
+            self.idx = idx
+            self.piece = piece
+            self.piece_rotated = piece_rotated
+            self.n_conflicts = nb_conflicts
+
     # starts from the lower-left corner
     solution = [(-1, -1, -1, -1) for _ in range(eternity_puzzle.n_piece)]
 
@@ -111,19 +119,19 @@ def solve_heuristic(eternity_puzzle) -> tuple[list[tuple[int, int, int, int]], i
 
     # We start from the bottom-left, go to the bottom-right, then top-right, and finally top-left, and keep going in this spiral pattern
     for x,y in range_spiral(eternity_puzzle.board_size):
-        best_piece_to_remove = remaining_pieces[0]
-        best_piece_rotated = remaining_pieces[0]
-        least_conflict_count = 999999
+        best_swaps = [BestSwap(-1, (-1, -1, -1, -1), (-1, -1, -1, -1), 999999)]
         for piece in remaining_pieces:
             piece_permutations = eternity_puzzle.generate_rotation(piece)
             for permutation in piece_permutations:
                 n_conflict = get_conflict_count(solution, x, y, permutation)
-                if n_conflict < least_conflict_count:
-                    least_conflict_count = n_conflict
-                    best_piece_rotated = permutation
-                    best_piece_to_remove = piece
+                if n_conflict < best_swaps[0].n_conflicts:
+                    best_swaps = [BestSwap(get_idx(x, y), piece, permutation, n_conflict)]
+                elif n_conflict == best_swaps[0].n_conflicts:
+                    best_swaps.append(BestSwap(get_idx(x, y), piece, permutation, n_conflict))
         
-        solution[get_idx(x, y)] = best_piece_rotated
-        remaining_pieces.remove(best_piece_to_remove)
+        # Choose the best swap
+        best_swap = random.choice(best_swaps)
+        solution[best_swap.idx] = best_swap.piece_rotated
+        remaining_pieces.remove(best_swap.piece)
 
     return solution, eternity_puzzle.get_total_n_conflict(solution)
