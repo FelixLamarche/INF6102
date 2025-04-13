@@ -16,6 +16,19 @@ class AdvancedSolver:
         self.solution = initial_solution
         self.n_conflicts = eternity_puzzle.get_total_n_conflict(self.solution)
 
+    def solve_LKH_multi_neighborhood(self, time_to_search_sec: float = 60):
+        max_iterations_no_improvement = 5
+
+        prev_conflicts = 999
+        time_limit = time.time() + time_to_search_sec
+        nb_iterations_no_improvement = 0
+        while self.n_conflicts != prev_conflicts and time.time() < time_limit and nb_iterations_no_improvement < max_iterations_no_improvement:
+            prev_conflicts = self.n_conflicts
+            self.solve_LKH(time_to_search_sec)
+            self.solve_LKH_complete_tiles(time_to_search_sec)
+            if self.n_conflicts >= prev_conflicts:
+                nb_iterations_no_improvement += 1
+
     def solve_LKH(self, time_to_search_sec: float = 60):
         """
         Solves the problem using a local search algorithm, until a local minimum is reached, by doing LKH swaps
@@ -37,7 +50,34 @@ class AdvancedSolver:
                 if time.time() > time_limit:
                     break
                 piece1 = get_piece(self.solution, x1, y1, self.board_size)
-                self.do_lkh_swap(x1, y1, piece1)
+                if get_conflict_count_for_piece(self.solution, x1, y1, piece1, self.board_size) == 0:
+                    continue
+                self.do_lkh_swap(x1, y1, piece1, self.get_best_swap_LKH)
+    
+    def solve_LKH_complete_tiles(self, time_to_search_sec: float = 60):
+        """
+        Solves the problem using a local search algorithm, until a local minimum is reached, by doing LKH swaps
+        """
+        # Create a neighborhood from a 2-opt, where we swap two pieces (can be a piece with another rotation of itself)
+        # We select the best neighbor (the one with the lowest cost) and keep going until we reach a local minimum
+        # We repeat this process from different random starts and keep the best solution found
+        MIN_CONFLICTS_SOLVED = 1
+
+        time_limit = time.time() + time_to_search_sec
+        prev_conflict_count = 9999999
+        #print("Conflicts start: ", self.n_conflicts)
+        while prev_conflict_count - self.n_conflicts >= MIN_CONFLICTS_SOLVED and time.time() < time_limit:
+            prev_conflict_count = self.n_conflicts
+            #print("Conflicts: ", self.n_conflicts)
+            board_positions = [(x, y) for x in range(self.board_size) for y in range(self.board_size)]
+            random.shuffle(board_positions)
+            for x1, y1 in board_positions:
+                if time.time() > time_limit:
+                    break
+                piece1 = get_piece(self.solution, x1, y1, self.board_size)
+                if get_conflict_count_for_piece(self.solution, x1, y1, piece1, self.board_size) == 0:
+                    continue
+                self.do_lkh_swap(x1, y1, piece1, self.get_best_swap_LKH_complete_tiles)
 
     def solve_best_swaps(self, time_to_search_sec: float = 60):
         """
@@ -58,6 +98,9 @@ class AdvancedSolver:
                 if time.time() > time_limit:
                     break
                 piece1 = get_piece(self.solution, x1, y1, self.board_size)
+                if get_conflict_count_for_piece(self.solution, x1, y1, piece1, self.board_size) == 0:
+                    continue
+                
                 piece2_to_swap, piece2_to_swap_coord, piece1_rotated = self.get_best_swap(x1, y1, piece1)
                 if piece2_to_swap is not None:
                    self.swap_pieces(x1, y1, piece1_rotated, piece2_to_swap_coord[0], piece2_to_swap_coord[1], piece2_to_swap)
@@ -109,17 +152,19 @@ class AdvancedSolver:
         if not are_pieces_same_position:
             self.solution[get_idx(x2, y2, self.board_size)] = new_piece1
 
-        new_n_conflicts = get_conflict_count_for_piece(self.solution, x1, y1, new_piece2, self.board_size)
+        new_piece2_conflicts = get_conflict_count_for_piece(self.solution, x1, y1, new_piece2, self.board_size)
+        new_piece1_conflicts = 0
         if not are_pieces_same_position:
-            new_n_conflicts += get_conflict_count_for_piece(self.solution, x2, y2, new_piece1, self.board_size)
+            new_piece1_conflicts = get_conflict_count_for_piece(self.solution, x2, y2, new_piece1, self.board_size)
         # Dont count twice the same conflict
+        new_n_conflicts = new_piece2_conflicts + new_piece1_conflicts
         if has_conflict_with_adjacent_piece(x2, y2, new_piece1, x1, y1, new_piece2):
             new_n_conflicts -= 1
 
         # Update the running conflict count
         self.n_conflicts += new_n_conflicts - prev_n_conflicts
 
-    def do_lkh_swap(self, x: int, y: int, piece1: tuple) -> int:
+    def do_lkh_swap(self, x: int, y: int, piece1: tuple, swap_neighborhood) -> int:
         """
         Does a LKH swap, where we continuously swap pieces until no more beneficial swaps are found
         Returns the number of swaps done
@@ -136,7 +181,7 @@ class AdvancedSolver:
         best_swap_conflict_count = self.n_conflicts
         best_swap_count = -1
         while piece_to_swap is not None:
-            piece2_to_swap, piece2_coord, piece_to_swap_rotated = self.get_best_swap_LKH(x_to_swap, y_to_swap, piece_to_swap, swapped_positions)
+            piece2_to_swap, piece2_coord, piece_to_swap_rotated = swap_neighborhood(x_to_swap, y_to_swap, piece_to_swap, swapped_positions)
             if piece2_to_swap is None:
                 break
 
@@ -266,89 +311,216 @@ class AdvancedSolver:
         # Keep track of the best swap so far
         best_swaps = [SwapInfo(None, (-1, -1), None, 0, 4, 0, 4)]
         # Check every piece and rotation as a possible swap
-        for x2 in range(self.board_size):
-            for y2 in range(self.board_size):
-                if (x2, y2) in tabu_list_pos:
-                    continue
+        positions = [(x2, y2) for x2 in range(self.board_size) for y2 in range(self.board_size)]
+        random.shuffle(positions)
 
-                piece2 = get_piece(self.solution, x2, y2, self.board_size)
-                prev_piece2_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece2, self.board_size)
-                # Dont count twice the same conflict
-                if has_conflict_with_adjacent_piece(x, y, piece1, x2, y2, piece2):
-                    prev_piece2_conflict_count -= 1
+        for position in positions:
+            x2, y2 = position
+            if (x2, y2) in tabu_list_pos:
+                continue
 
-                # Evaluate the swap 
-                best_piece1_rotation_attempt = None
-                best_piece1_rotation_conflict_count = 999999
-                best_piece2_rotation = None
-                best_piece2_conflict_count = 999999
-                if are_coords_adjacent(x, y, x2, y2): # If they are adjacent, they influence each other, so we calculate the conflicts differently
-                    # Check every possible rotation of the pieces by swapping them and evaluating the conflicts
-                    piece1_idx = get_idx(x, y, self.board_size)
-                    piece2_idx = get_idx(x2, y2, self.board_size)
-                    for piece1_rotation in piece1_rotations:
-                        for piece2_rotation in self.eternity_puzzle.generate_rotation(piece2):
-                            self.solution[piece2_idx] = piece1_rotation
-                            self.solution[piece1_idx] = piece2_rotation
+            piece2 = get_piece(self.solution, x2, y2, self.board_size)
+            prev_piece2_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece2, self.board_size)
+            # Dont count twice the same conflict
+            if has_conflict_with_adjacent_piece(x, y, piece1, x2, y2, piece2):
+                prev_piece2_conflict_count -= 1
 
-                            piece1_rotation_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece1_rotation, self.board_size)
-                            piece2_rotation_conflict_count = get_conflict_count_for_piece(self.solution, x, y, piece2_rotation, self.board_size)
-                            # Dont count twice the same conflict
-                            if has_conflict_with_adjacent_piece(x2, y2, piece1_rotation, x, y, piece2_rotation):
-                                piece2_rotation_conflict_count -= 1
-
-                            # Check if the swap is the beneficial
-                            if piece1_rotation_conflict_count < best_piece1_rotation_conflict_count or\
-                               (piece1_rotation_conflict_count == best_piece1_rotation_conflict_count and piece2_rotation_conflict_count < best_piece2_conflict_count):
-                                best_piece1_rotation_conflict_count = piece1_rotation_conflict_count
-                                best_piece1_rotation_attempt = piece1_rotation
-                                best_piece2_conflict_count = piece2_rotation_conflict_count
-                                best_piece2_rotation = piece2_rotation
-                    # Reset the pieces to their original state
-                    self.solution[piece1_idx] = piece1
-                    self.solution[piece2_idx] = piece2
-                else: # We can evaluate the swap without swapping if they are not adjacent and do not have conflicts between each other, and check less possibilities (16 to 8)
-                    # Get the best rotation for the original piece in piece2's place
-                    temp_best_piece1_rotation_conflict_count = 999
-                    temp_best_piece1_rotation_attempt = None
-                    for piece1_rotation in piece1_rotations:
-                        swap_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece1_rotation, self.board_size)
-                        if swap_conflict_count < temp_best_piece1_rotation_conflict_count:
-                            temp_best_piece1_rotation_conflict_count = swap_conflict_count
-                            temp_best_piece1_rotation_attempt = piece1_rotation
-
-                    temp_best_piece2_conflict_count = 999
-                    temp_best_piece2_rotation = None
-                    # Get the best rotation for the piece2 in the original piece's place
+            # Evaluate the swap 
+            best_piece1_rotation_attempt = None
+            best_piece1_rotation_conflict_count = 999999
+            best_piece2_rotation = None
+            best_piece2_conflict_count = 999999
+            if are_coords_adjacent(x, y, x2, y2): # If they are adjacent, they influence each other, so we calculate the conflicts differently
+                # Check every possible rotation of the pieces by swapping them and evaluating the conflicts
+                piece1_idx = get_idx(x, y, self.board_size)
+                piece2_idx = get_idx(x2, y2, self.board_size)
+                for piece1_rotation in piece1_rotations:
                     for piece2_rotation in self.eternity_puzzle.generate_rotation(piece2):
-                        swap_conflict_count = get_conflict_count_for_piece(self.solution, x, y, piece2_rotation, self.board_size)
+                        self.solution[piece2_idx] = piece1_rotation
+                        self.solution[piece1_idx] = piece2_rotation
+
+                        piece1_rotation_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece1_rotation, self.board_size)
+                        piece2_rotation_conflict_count = get_conflict_count_for_piece(self.solution, x, y, piece2_rotation, self.board_size)
                         # Dont count twice the same conflict
                         if has_conflict_with_adjacent_piece(x2, y2, piece1_rotation, x, y, piece2_rotation):
-                            swap_conflict_count -= 1
-                        if swap_conflict_count < temp_best_piece2_conflict_count:
-                            temp_best_piece2_conflict_count = swap_conflict_count
-                            temp_best_piece2_rotation = piece2_rotation
-                    
-                    # Check if the swap is the beneficial
-                    if temp_best_piece1_rotation_conflict_count < best_piece1_rotation_conflict_count or\
-                       (temp_best_piece1_rotation_conflict_count == best_piece1_rotation_conflict_count and temp_best_piece2_conflict_count < best_piece2_conflict_count):
-                        best_piece1_rotation_conflict_count = temp_best_piece1_rotation_conflict_count
-                        best_piece1_rotation_attempt = temp_best_piece1_rotation_attempt
-                        best_piece2_conflict_count = temp_best_piece2_conflict_count
-                        best_piece2_rotation = temp_best_piece2_rotation
+                            piece2_rotation_conflict_count -= 1
 
-                # Check if the swap is the beneficial and the best
-                piece1_delta_conflict = best_piece1_rotation_conflict_count - prev_piece1_conflict_count
-                piece2_delta_conflict = best_piece2_conflict_count - prev_piece2_conflict_count
+                        # Check if the swap is the beneficial
+                        if piece1_rotation_conflict_count < best_piece1_rotation_conflict_count or\
+                            (piece1_rotation_conflict_count == best_piece1_rotation_conflict_count and piece2_rotation_conflict_count < best_piece2_conflict_count):
+                            best_piece1_rotation_conflict_count = piece1_rotation_conflict_count
+                            best_piece1_rotation_attempt = piece1_rotation
+                            best_piece2_conflict_count = piece2_rotation_conflict_count
+                            best_piece2_rotation = piece2_rotation
+                # Reset the pieces to their original state
+                self.solution[piece1_idx] = piece1
+                self.solution[piece2_idx] = piece2
+            else: # We can evaluate the swap without swapping if they are not adjacent and do not have conflicts between each other, and check less possibilities (16 to 8)
+                # Get the best rotation for the original piece in piece2's place
 
-                if piece1_delta_conflict < best_swaps[0].piece1_conflict_delta or\
-                    (piece1_delta_conflict == best_swaps[0].piece1_conflict_delta and piece2_delta_conflict < best_swaps[0].piece2_conflict_delta):
-                    # If the swap is better we replace the best swaps found so far
-                    best_swaps = [SwapInfo(best_piece1_rotation_attempt, (x2, y2), best_piece2_rotation, piece1_delta_conflict, best_piece1_rotation_conflict_count, piece2_delta_conflict, best_piece2_conflict_count)]
-                elif piece1_delta_conflict == best_swaps[0].piece1_conflict_delta and piece2_delta_conflict == best_swaps[0].piece2_conflict_delta:
-                    # If the swap is equal to the best, we add it to the list of best swaps
-                    best_swaps.append(SwapInfo(best_piece1_rotation_attempt, (x2, y2), best_piece2_rotation, piece1_delta_conflict, best_piece1_rotation_conflict_count, piece2_delta_conflict, best_piece2_conflict_count))
+                required_colors = get_required_colors(self.solution, x2, y2)
+                if get_number_of_common_colors(piece1, required_colors) <= 4 - best_swaps[0].piece1_conflict_count:
+                    continue
+
+                temp_best_piece1_rotation_conflict_count = 999
+                temp_best_piece1_rotation_attempt = None
+                for piece1_rotation in piece1_rotations:
+                    swap_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece1_rotation, self.board_size)
+                    if swap_conflict_count < temp_best_piece1_rotation_conflict_count:
+                        temp_best_piece1_rotation_conflict_count = swap_conflict_count
+                        temp_best_piece1_rotation_attempt = piece1_rotation
+
+                temp_best_piece2_conflict_count = 999
+                temp_best_piece2_rotation = None
+                # Get the best rotation for the piece2 in the original piece's place
+                for piece2_rotation in self.eternity_puzzle.generate_rotation(piece2):
+                    swap_conflict_count = get_conflict_count_for_piece(self.solution, x, y, piece2_rotation, self.board_size)
+                    # Dont count twice the same conflict
+                    if has_conflict_with_adjacent_piece(x2, y2, piece1_rotation, x, y, piece2_rotation):
+                        swap_conflict_count -= 1
+                    if swap_conflict_count < temp_best_piece2_conflict_count:
+                        temp_best_piece2_conflict_count = swap_conflict_count
+                        temp_best_piece2_rotation = piece2_rotation
+                
+                # Check if the swap is the beneficial
+                if temp_best_piece1_rotation_conflict_count < best_piece1_rotation_conflict_count or\
+                    (temp_best_piece1_rotation_conflict_count == best_piece1_rotation_conflict_count and temp_best_piece2_conflict_count < best_piece2_conflict_count):
+                    best_piece1_rotation_conflict_count = temp_best_piece1_rotation_conflict_count
+                    best_piece1_rotation_attempt = temp_best_piece1_rotation_attempt
+                    best_piece2_conflict_count = temp_best_piece2_conflict_count
+                    best_piece2_rotation = temp_best_piece2_rotation
+
+            # Check if the swap is the beneficial and the best
+            piece1_delta_conflict = best_piece1_rotation_conflict_count - prev_piece1_conflict_count
+            piece2_delta_conflict = best_piece2_conflict_count - prev_piece2_conflict_count
+
+            if piece1_delta_conflict < best_swaps[0].piece1_conflict_delta or\
+                (piece1_delta_conflict == best_swaps[0].piece1_conflict_delta and piece2_delta_conflict < best_swaps[0].piece2_conflict_delta):
+                # If the swap is better we replace the best swaps found so far
+                best_swaps = [SwapInfo(best_piece1_rotation_attempt, (x2, y2), best_piece2_rotation, piece1_delta_conflict, best_piece1_rotation_conflict_count, piece2_delta_conflict, best_piece2_conflict_count)]
+            elif piece1_delta_conflict == best_swaps[0].piece1_conflict_delta and piece2_delta_conflict == best_swaps[0].piece2_conflict_delta:
+                # If the swap is equal to the best, we add it to the list of best swaps
+                best_swaps.append(SwapInfo(best_piece1_rotation_attempt, (x2, y2), best_piece2_rotation, piece1_delta_conflict, best_piece1_rotation_conflict_count, piece2_delta_conflict, best_piece2_conflict_count))
+
+            if best_swaps[0].piece1_conflict_count == 0 and best_swaps[0].piece2_conflict_count == 0:
+                # If the swap is perfect, we can stop searching
+                break
         
+        chosen_swap = random.choice(best_swaps) # Randomly select one of the best swaps found
+        return (chosen_swap.piece2_to_swap, chosen_swap.piece2_coord, chosen_swap.piece1_rotation)
+        
+    def get_best_swap_LKH_complete_tiles(self, x: int, y: int, piece1: tuple, tabu_list_pos: list[tuple[int, int]]) -> tuple[tuple[int, int, int, int], tuple[int, int], tuple]:
+        """
+        Returns the piece to swap with and its coordinates, and the correct piece rotation, if a beneficial swap is found for piece1 by trying for complete tiles
+        Returns the best swap which reduces the most conflicts, for piece1 only and not the best swap for the whole board
+        This can be used for LKH swaps to continuously swap pieces until no more beneficial swaps are found
+        """
+        class SwapInfo:
+            # This class is used to keep track of the best swap found so far
+            def __init__(self, piece1_rotation: tuple, piece2_coord: tuple[int, int], piece2_to_swap: tuple, piece1_conflict_delta: int, piece1_conflict_count: int, piece2_conflict_delta: int, piece2_conflict_count: int):
+                self.piece1_rotation = piece1_rotation
+                self.piece2_coord = piece2_coord
+                self.piece2_to_swap = piece2_to_swap
+                self.piece1_conflict_delta = piece1_conflict_delta
+                self.piece1_conflict_count = piece1_conflict_count
+                self.piece2_conflict_delta = piece2_conflict_delta
+                self.piece2_conflict_count = piece2_conflict_count
+
+        prev_piece1_conflict_count = get_conflict_count_for_piece(self.solution, x, y, piece1, self.board_size)
+        piece1_rotations = self.eternity_puzzle.generate_rotation(piece1)
+        # Keep track of the best swap so far
+        best_swaps = [SwapInfo(None, (-1, -1), None, 0, 4, 0, 4)]
+        # Check every piece and rotation as a possible swap
+        positions = [(x2, y2) for x2 in range(self.board_size) for y2 in range(self.board_size)]
+        random.shuffle(positions)
+
+        for position in positions:
+            x2, y2 = position
+            if (x2, y2) in tabu_list_pos:
+                continue
+
+            piece2 = get_piece(self.solution, x2, y2, self.board_size)
+            prev_piece2_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece2, self.board_size)
+            # Dont count twice the same conflict
+            if has_conflict_with_adjacent_piece(x, y, piece1, x2, y2, piece2):
+                prev_piece2_conflict_count -= 1
+
+            # Evaluate the swap 
+            best_piece1_rotation_attempt = None
+            best_piece1_rotation_conflict_count = 999999
+            best_piece2_rotation = None
+            best_piece2_conflict_count = 999999
+            if are_coords_adjacent(x, y, x2, y2): # If they are adjacent, they influence each other, so we calculate the conflicts differently
+                # Check every possible rotation of the pieces by swapping them and evaluating the conflicts
+                piece1_idx = get_idx(x, y, self.board_size)
+                piece2_idx = get_idx(x2, y2, self.board_size)
+
+                for piece1_rotation in piece1_rotations:
+                    for piece2_rotation in self.eternity_puzzle.generate_rotation(piece2):
+                        self.solution[piece2_idx] = piece1_rotation
+                        self.solution[piece1_idx] = piece2_rotation
+
+                        piece1_rotation_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece1_rotation, self.board_size)
+                        piece2_rotation_conflict_count = get_conflict_count_for_piece(self.solution, x, y, piece2_rotation, self.board_size)
+                        # Dont count twice the same conflict
+                        if has_conflict_with_adjacent_piece(x2, y2, piece1_rotation, x, y, piece2_rotation):
+                            piece2_rotation_conflict_count -= 1
+
+                        # Check if the swap is the beneficial
+                        if piece1_rotation_conflict_count < best_piece1_rotation_conflict_count or\
+                            (piece1_rotation_conflict_count == best_piece1_rotation_conflict_count and piece2_rotation_conflict_count < best_piece2_conflict_count):
+                            best_piece1_rotation_conflict_count = piece1_rotation_conflict_count
+                            best_piece1_rotation_attempt = piece1_rotation
+                            best_piece2_conflict_count = piece2_rotation_conflict_count
+                            best_piece2_rotation = piece2_rotation
+                # Reset the pieces to their original state
+                self.solution[piece1_idx] = piece1
+                self.solution[piece2_idx] = piece2
+            else: # We can evaluate the swap without swapping if they are not adjacent and do not have conflicts between each other, and check less possibilities (16 to 8)
+                # Get the best rotation for the original piece in piece2's place
+
+                temp_best_piece1_rotation_conflict_count = 999
+                temp_best_piece1_rotation_attempt = None
+                for piece1_rotation in piece1_rotations:
+                    swap_conflict_count = get_conflict_count_for_piece(self.solution, x2, y2, piece1_rotation, self.board_size)
+                    if swap_conflict_count < temp_best_piece1_rotation_conflict_count:
+                        temp_best_piece1_rotation_conflict_count = swap_conflict_count
+                        temp_best_piece1_rotation_attempt = piece1_rotation
+
+                temp_best_piece2_conflict_count = 999
+                temp_best_piece2_rotation = None
+                # Get the best rotation for the piece2 in the original piece's place
+                for piece2_rotation in self.eternity_puzzle.generate_rotation(piece2):
+                    swap_conflict_count = get_conflict_count_for_piece(self.solution, x, y, piece2_rotation, self.board_size)
+                    # Dont count twice the same conflict
+                    if has_conflict_with_adjacent_piece(x2, y2, piece1_rotation, x, y, piece2_rotation):
+                        swap_conflict_count -= 1
+                    if swap_conflict_count < temp_best_piece2_conflict_count:
+                        temp_best_piece2_conflict_count = swap_conflict_count
+                        temp_best_piece2_rotation = piece2_rotation
+                
+                # Check if the swap is the beneficial
+                if temp_best_piece1_rotation_conflict_count < best_piece1_rotation_conflict_count or\
+                    (temp_best_piece1_rotation_conflict_count == best_piece1_rotation_conflict_count and temp_best_piece2_conflict_count < best_piece2_conflict_count):
+                    best_piece1_rotation_conflict_count = temp_best_piece1_rotation_conflict_count
+                    best_piece1_rotation_attempt = temp_best_piece1_rotation_attempt
+                    best_piece2_conflict_count = temp_best_piece2_conflict_count
+                    best_piece2_rotation = temp_best_piece2_rotation
+
+            # Check if the swap is the beneficial and the best
+            piece1_delta_conflict = best_piece1_rotation_conflict_count - prev_piece1_conflict_count
+            piece2_delta_conflict = best_piece2_conflict_count - prev_piece2_conflict_count
+
+            if best_piece1_rotation_conflict_count == 0 and best_piece2_conflict_count == 0:
+                # If the swap is perfect, we can stop searching
+                best_swaps = [SwapInfo(best_piece1_rotation_attempt, (x2, y2), best_piece2_rotation, piece1_delta_conflict, best_piece1_rotation_conflict_count, piece2_delta_conflict, best_piece2_conflict_count)]
+                break
+
+            if best_piece1_rotation_conflict_count == 0:
+                best_swaps.append(SwapInfo(best_piece1_rotation_attempt, (x2, y2), best_piece2_rotation, piece1_delta_conflict, best_piece1_rotation_conflict_count, piece2_delta_conflict, best_piece2_conflict_count))
+
+        if len(best_swaps) == 0:
+            return (None, (-1, -1), None)
         chosen_swap = random.choice(best_swaps) # Randomly select one of the best swaps found
         return (chosen_swap.piece2_to_swap, chosen_swap.piece2_coord, chosen_swap.piece1_rotation)
 
@@ -431,6 +603,15 @@ class AdvancedSolver:
             return True
         f = math.exp(-(new_conflicts - old_conflicts) / temp)
         return random.random() < f
+    
+    def set_tiles_conflict_counts(self):
+        """
+        Sets the conflict counts for each tile in the solution
+        """
+        for x in range(self.board_size):
+            for y in range(self.board_size):
+                idx = get_idx(x, y, self.board_size)
+                self.tile_conflict_counts[idx] = get_conflict_count_for_piece(self.solution, x, y, self.solution[idx], self.board_size)
 
 
 def get_initial_solution_semi_random(eternity_puzzle: EternityPuzzle) -> list[tuple[int, int, int, int]]:
@@ -473,13 +654,15 @@ def get_initial_solution(eternity_puzzle: EternityPuzzle) -> list[tuple[int, int
 def get_initial_solution_heuristic(eternity_puzzle: EternityPuzzle) -> list[tuple[int, int, int, int]]:
     return solve_heuristic(eternity_puzzle)[0]
 
-def get_initial_solution_heuristic_best(eternity_puzzle: EternityPuzzle, nb_tries) -> list[tuple[int, int, int, int]]:
+def get_initial_solution_heuristic_best(eternity_puzzle: EternityPuzzle, time_to_search: float) -> list[tuple[int, int, int, int]]:
     """
     Returns the best solution found by the heuristic solver
     """
     best_solution = None
     best_conflict_count = 999
-    for _ in range(nb_tries):
+    end_time = time.time() + time_to_search
+
+    while time.time() < end_time:
         solution = solve_heuristic(eternity_puzzle)[0]
         conflict_count = eternity_puzzle.get_total_n_conflict(solution)
         if conflict_count < best_conflict_count:
@@ -634,10 +817,10 @@ def solve_advanced(eternity_puzzle):
     :return: a tuple (solution, cost) where solution is a list of the pieces (rotations applied) and
         cost is the cost of the solution
     """
-    TIME_SEARCH_SEC = 900 # Will be 1 hour for the final version
-    TIME_SEARCH_MARGIN = 5 # PUT This to 5 seconds to avoid timing out in the final version
+    TIME_SEARCH_SEC = 3600 # Will be 1 hour for the final version
+    TIME_SEARCH_MARGIN = 15 # PUT This to 5 seconds to avoid timing out in the final version
 
-    NB_ITERATIONS_NO_IMPROVEMENT = 100
+    NB_ITERATIONS_NO_IMPROVEMENT = 250
 
     best_solution = None # Best solution found so far
     best_conflict_count = 999
@@ -675,12 +858,12 @@ def solve_advanced(eternity_puzzle):
         nb_pieces_to_shuffle = 0
         ratio_of_conflicts = 0
         if initial_solution is None: # If there isn't an initial solution
-            initial_solution = get_initial_solution_heuristic_best(eternity_puzzle, 50)
+            initial_solution = get_initial_solution_heuristic_best(eternity_puzzle, TIME_SEARCH_MARGIN)
             #initial_solution = solve_backtrack(eternity_puzzle, 5.0)
             #initial_solution = get_initial_solution_semi_random(eternity_puzzle)
             print("Initial solution conflicts: ", eternity_puzzle.get_total_n_conflict(initial_solution))
         else: # If there is an initial solution, perturb it
-            percentage_of_shuffle = random.uniform(0.04, 0.50)
+            percentage_of_shuffle = random.uniform(0.05, 0.50)
             nb_pieces_to_shuffle = int(len(initial_solution) * percentage_of_shuffle)
             #initial_solution = shuffle_solution_random(initial_solution, nb_pieces_to_shuffle)
             ratio_of_conflicts = random.uniform(0.2, 0.5)
@@ -691,9 +874,11 @@ def solve_advanced(eternity_puzzle):
             #initial_solution = shuffle_solution(initial_solution, nb_shuffle_pieces_no_conflicts, nb_shuffle_pieces_conflicts)
 
         solver = AdvancedSolver(eternity_puzzle, initial_solution)
-        random_choice = random.randint(2, 2)
+        random_choice = random.randint(0, 0)
         if random_choice == 0:
             solver.solve_LKH(time_to_search)
+            #solver.solve_LKH_complete_tiles(time_to_search)
+            #solver.solve_LKH_multi_neighborhood(time_to_search)
         elif random_choice == 1:
             solver.solve_best_swaps(time_to_search)
         else:
