@@ -330,7 +330,7 @@ def solve_advanced(eternity_puzzle):
     :return: a tuple (solution, cost) where solution is a list of the pieces (rotations applied) and
         cost is the cost of the solution
     """
-    TIME_SEARCH_SEC = 600 # Will be 1 hour for the final version
+    TIME_SEARCH_SEC = 3600 # Will be 1 hour for the final version
     TIME_SEARCH_MARGIN = 5 # PUT This to 5 seconds to avoid timing out in the final version
 
     NB_ITERATIONS_NO_IMPROVEMENT = 100
