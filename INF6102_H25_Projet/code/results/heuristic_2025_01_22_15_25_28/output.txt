@@ -1,0 +1,120 @@
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_A.txt
+[INFO] output file: results/heuristic_2025_01_22_15_25_28/eternity_trivial_A.txt
+[INFO] visualization file: results/heuristic_2025_01_22_15_25_28/eternity_trivial_A.png
+[INFO] board size: 2 x 2
+[INFO] solver selected: heuristic
+***********************************************************
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_B.txt
+[INFO] output file: results/heuristic_2025_01_22_15_25_28/eternity_trivial_B.txt
+[INFO] visualization file: results/heuristic_2025_01_22_15_25_28/eternity_trivial_B.png
+[INFO] board size: 3 x 3
+[INFO] solver selected: heuristic
+***********************************************************
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_A.txt
+[INFO] output file: results/heuristic_2025_01_22_15_25_28/eternity_A.txt
+[INFO] visualization file: results/heuristic_2025_01_22_15_25_28/eternity_A.png
+[INFO] board size: 4 x 4
+[INFO] solver selected: heuristic
+***********************************************************
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 10
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_B.txt
+[INFO] output file: results/heuristic_2025_01_22_15_25_28/eternity_B.txt
+[INFO] visualization file: results/heuristic_2025_01_22_15_25_28/eternity_B.png
+[INFO] board size: 7 x 7
+[INFO] solver selected: heuristic
+***********************************************************
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 17
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_C.txt
+[INFO] output file: results/heuristic_2025_01_22_15_25_28/eternity_C.txt
+[INFO] visualization file: results/heuristic_2025_01_22_15_25_28/eternity_C.png
+[INFO] board size: 8 x 8
+[INFO] solver selected: heuristic
+***********************************************************
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 29
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_D.txt
+[INFO] output file: results/heuristic_2025_01_22_15_25_28/eternity_D.txt
+[INFO] visualization file: results/heuristic_2025_01_22_15_25_28/eternity_D.png
+[INFO] board size: 9 x 9
+[INFO] solver selected: heuristic
+***********************************************************
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 43
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_E.txt
+[INFO] output file: results/heuristic_2025_01_22_15_25_28/eternity_E.txt
+[INFO] visualization file: results/heuristic_2025_01_22_15_25_28/eternity_E.png
+[INFO] board size: 10 x 10
+[INFO] solver selected: heuristic
+***********************************************************
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 43
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_complet.txt
+[INFO] output file: results/heuristic_2025_01_22_15_25_28/eternity_complet.txt
+[INFO] visualization file: results/heuristic_2025_01_22_15_25_28/eternity_complet.png
+[INFO] board size: 16 x 16
+[INFO] solver selected: heuristic
+***********************************************************
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 93
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************

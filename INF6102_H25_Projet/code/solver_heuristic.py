@@ -118,7 +118,7 @@ def solve_heuristic(eternity_puzzle) -> tuple[list[tuple[int, int, int, int]], i
     remaining_pieces = copy.deepcopy(eternity_puzzle.piece_list)
 
     # We start from the bottom-left, go to the bottom-right, then top-right, and finally top-left, and keep going in this spiral pattern
-    for x,y in range_spiral(eternity_puzzle.board_size):
+    for x, y in range_spiral(eternity_puzzle.board_size):
         best_swaps = [BestSwap(-1, (-1, -1, -1, -1), (-1, -1, -1, -1), 999999)]
         for piece in remaining_pieces:
             piece_permutations = eternity_puzzle.generate_rotation(piece)
@@ -128,7 +128,7 @@ def solve_heuristic(eternity_puzzle) -> tuple[list[tuple[int, int, int, int]], i
                     best_swaps = [BestSwap(get_idx(x, y), piece, permutation, n_conflict)]
                 elif n_conflict == best_swaps[0].n_conflicts:
                     best_swaps.append(BestSwap(get_idx(x, y), piece, permutation, n_conflict))
-        
+            
         # Choose the best swap
         best_swap = random.choice(best_swaps)
         solution[best_swap.idx] = best_swap.piece_rotated

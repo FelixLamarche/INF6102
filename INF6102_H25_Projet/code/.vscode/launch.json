@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "main.py",
       "console": "integratedTerminal",
-      "args": ["--agent=heuristic", "--infile=instances/eternity_B.txt"]
+      "args": ["--agent=advanced", "--infile=instances/eternity_B.txt"]
     }
   ]
 }

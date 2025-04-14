@@ -1,0 +1,136 @@
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_A.txt
+[INFO] output file: results/local_search_2025_02_25_20_37_41/eternity_trivial_A.txt
+[INFO] visualization file: results/local_search_2025_02_25_20_37_41/eternity_trivial_A.png
+[INFO] board size: 2 x 2
+[INFO] solver selected: local_search
+***********************************************************
+Seed:  5765173795526857106
+Conflicts start:  8
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_B.txt
+[INFO] output file: results/local_search_2025_02_25_20_37_41/eternity_trivial_B.txt
+[INFO] visualization file: results/local_search_2025_02_25_20_37_41/eternity_trivial_B.png
+[INFO] board size: 3 x 3
+[INFO] solver selected: local_search
+***********************************************************
+Seed:  1026235244950702998
+Conflicts start:  17
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 6
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_A.txt
+[INFO] output file: results/local_search_2025_02_25_20_37_41/eternity_A.txt
+[INFO] visualization file: results/local_search_2025_02_25_20_37_41/eternity_A.png
+[INFO] board size: 4 x 4
+[INFO] solver selected: local_search
+***********************************************************
+Seed:  2224842275282246595
+Conflicts start:  32
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_B.txt
+[INFO] output file: results/local_search_2025_02_25_20_37_41/eternity_B.txt
+[INFO] visualization file: results/local_search_2025_02_25_20_37_41/eternity_B.png
+[INFO] board size: 7 x 7
+[INFO] solver selected: local_search
+***********************************************************
+Seed:  2841138403194617816
+Conflicts start:  85
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 14
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_C.txt
+[INFO] output file: results/local_search_2025_02_25_20_37_41/eternity_C.txt
+[INFO] visualization file: results/local_search_2025_02_25_20_37_41/eternity_C.png
+[INFO] board size: 8 x 8
+[INFO] solver selected: local_search
+***********************************************************
+Seed:  8174779743962126671
+Conflicts start:  114
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 31
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_D.txt
+[INFO] output file: results/local_search_2025_02_25_20_37_41/eternity_D.txt
+[INFO] visualization file: results/local_search_2025_02_25_20_37_41/eternity_D.png
+[INFO] board size: 9 x 9
+[INFO] solver selected: local_search
+***********************************************************
+Seed:  8158953083214132237
+Conflicts start:  152
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 35
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_E.txt
+[INFO] output file: results/local_search_2025_02_25_20_37_41/eternity_E.txt
+[INFO] visualization file: results/local_search_2025_02_25_20_37_41/eternity_E.png
+[INFO] board size: 10 x 10
+[INFO] solver selected: local_search
+***********************************************************
+Seed:  4700994398446978962
+Conflicts start:  191
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.01 minutes
+[INFO] Number of conflicts: 44
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_complet.txt
+[INFO] output file: results/local_search_2025_02_25_20_37_41/eternity_complet.txt
+[INFO] visualization file: results/local_search_2025_02_25_20_37_41/eternity_complet.png
+[INFO] board size: 16 x 16
+[INFO] solver selected: local_search
+***********************************************************
+Seed:  2389187891659876904
+Conflicts start:  493
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.06 minutes
+[INFO] Number of conflicts: 150
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************

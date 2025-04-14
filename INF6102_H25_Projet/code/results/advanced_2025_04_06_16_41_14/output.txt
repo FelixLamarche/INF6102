@@ -1,0 +1,146 @@
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_A.txt
+[INFO] output file: results/advanced_2025_04_06_16_41_14/eternity_trivial_A.txt
+[INFO] visualization file: results/advanced_2025_04_06_16_41_14/eternity_trivial_A.png
+[INFO] board size: 2 x 2
+[INFO] solver selected: advanced
+***********************************************************
+Iteration: 1  time:  0.00  best:  0  conflicts:  0  time iter:  0.00
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_B.txt
+[INFO] output file: results/advanced_2025_04_06_16_41_14/eternity_trivial_B.txt
+[INFO] visualization file: results/advanced_2025_04_06_16_41_14/eternity_trivial_B.png
+[INFO] board size: 3 x 3
+[INFO] solver selected: advanced
+***********************************************************
+Iteration: 1  time:  0.00  best:  0  conflicts:  0  time iter:  0.00
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_A.txt
+[INFO] output file: results/advanced_2025_04_06_16_41_14/eternity_A.txt
+[INFO] visualization file: results/advanced_2025_04_06_16_41_14/eternity_A.png
+[INFO] board size: 4 x 4
+[INFO] solver selected: advanced
+***********************************************************
+Iteration: 1  time:  0.02  best:  6  conflicts:  6  time iter:  0.02
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 59.92 minutes
+[INFO] Number of conflicts: 6
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_B.txt
+[INFO] output file: results/advanced_2025_04_06_16_41_14/eternity_B.txt
+[INFO] visualization file: results/advanced_2025_04_06_16_41_14/eternity_B.png
+[INFO] board size: 7 x 7
+[INFO] solver selected: advanced
+***********************************************************
+Iteration: 1  time:  0.18  best:  10  conflicts:  10  time iter:  0.18
+Iteration: 2  time:  0.34  best:  9  conflicts:  9  time iter:  0.16
+Iteration: 137  time:  17.25  best:  8  conflicts:  8  time iter:  0.28
+Iteration: 139  time:  17.58  best:  6  conflicts:  6  time iter:  0.16
+Iteration: 162  time:  20.28  best:  5  conflicts:  5  time iter:  0.33
+Iteration: 1073  time:  133.70  best:  3  conflicts:  3  time iter:  0.36
+Iteration: 1342  time:  166.56  best:  2  conflicts:  2  time iter:  0.31
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 59.92 minutes
+[INFO] Number of conflicts: 2
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_C.txt
+[INFO] output file: results/advanced_2025_04_06_16_41_14/eternity_C.txt
+[INFO] visualization file: results/advanced_2025_04_06_16_41_14/eternity_C.png
+[INFO] board size: 8 x 8
+[INFO] solver selected: advanced
+***********************************************************
+Iteration: 1  time:  0.44  best_conflicts:  22  conflicts:  22  time iter:  0.44  nb pieces shuffled:  0
+Iteration: 2  time:  1.00  best_conflicts:  18  conflicts:  18  time iter:  0.56  nb pieces shuffled:  25
+Iteration: 38  time:  16.86  best_conflicts:  17  conflicts:  17  time iter:  0.74  nb pieces shuffled:  25
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.36 minutes
+[INFO] Number of conflicts: 17
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_D.txt
+[INFO] output file: results/advanced_2025_04_06_16_41_14/eternity_D.txt
+[INFO] visualization file: results/advanced_2025_04_06_16_41_14/eternity_D.png
+[INFO] board size: 9 x 9
+[INFO] solver selected: advanced
+***********************************************************
+Iteration: 1  time:  0.90  best_conflicts:  30  conflicts:  30  time iter:  0.90  nb pieces shuffled:  0
+Iteration: 2  time:  2.16  best_conflicts:  24  conflicts:  24  time iter:  1.25  nb pieces shuffled:  0
+Iteration: 11  time:  10.36  best_conflicts:  21  conflicts:  21  time iter:  1.53  nb pieces shuffled:  0
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.72 minutes
+[INFO] Number of conflicts: 21
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_E.txt
+[INFO] output file: results/advanced_2025_04_06_16_41_14/eternity_E.txt
+[INFO] visualization file: results/advanced_2025_04_06_16_41_14/eternity_E.png
+[INFO] board size: 10 x 10
+[INFO] solver selected: advanced
+***********************************************************
+Iteration: 1  time:  1.70  best_conflicts:  30  conflicts:  30  time iter:  1.70  nb pieces shuffled:  0
+Iteration: 5  time:  8.16  best_conflicts:  28  conflicts:  28  time iter:  0.62  nb pieces shuffled:  7
+Iteration: 6  time:  10.67  best_conflicts:  27  conflicts:  27  time iter:  2.50  nb pieces shuffled:  49
+Iteration: 10  time:  14.42  best_conflicts:  26  conflicts:  26  time iter:  1.00  nb pieces shuffled:  26
+Iteration: 20  time:  27.18  best_conflicts:  24  conflicts:  24  time iter:  1.26  nb pieces shuffled:  7
+Iteration: 23  time:  30.65  best_conflicts:  23  conflicts:  23  time iter:  0.60  nb pieces shuffled:  1
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 1.37 minutes
+[INFO] Number of conflicts: 23
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_complet.txt
+[INFO] output file: results/advanced_2025_04_06_16_41_14/eternity_complet.txt
+[INFO] visualization file: results/advanced_2025_04_06_16_41_14/eternity_complet.png
+[INFO] board size: 16 x 16
+[INFO] solver selected: advanced
+***********************************************************
+NewLocalBest : Iteration: 1  time:  12.24  best_conflicts:  999  conflicts:  72  time iter:  12.24  nb pieces shuffled:  0
+NewGlobalBest: Iteration: 1  time:  12.24  best_conflicts:  72  conflicts:  72  time iter:  12.24  nb pieces shuffled:  0
+NewLocalBest : Iteration: 11  time:  117.25  best_conflicts:  72  conflicts:  71  time iter:  5.89  nb pieces shuffled:  13
+NewGlobalBest: Iteration: 11  time:  117.25  best_conflicts:  71  conflicts:  71  time iter:  5.89  nb pieces shuffled:  13
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 11.79 minutes
+[INFO] Number of conflicts: 71
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
