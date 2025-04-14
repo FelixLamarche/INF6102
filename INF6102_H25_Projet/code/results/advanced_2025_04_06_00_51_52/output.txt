@@ -1,0 +1,196 @@
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_A.txt
+[INFO] output file: results/advanced_2025_04_06_00_51_52/eternity_trivial_A.txt
+[INFO] visualization file: results/advanced_2025_04_06_00_51_52/eternity_trivial_A.png
+[INFO] board size: 2 x 2
+[INFO] solver selected: advanced
+***********************************************************
+Seed:  4934707568056291705
+Iteration  1  best:  0  conflicts:  0  time:  0.0
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_B.txt
+[INFO] output file: results/advanced_2025_04_06_00_51_52/eternity_trivial_B.txt
+[INFO] visualization file: results/advanced_2025_04_06_00_51_52/eternity_trivial_B.png
+[INFO] board size: 3 x 3
+[INFO] solver selected: advanced
+***********************************************************
+Seed:  1573976252324816869
+Iteration  1  best:  0  conflicts:  0  time:  0.0019943714141845703
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_A.txt
+[INFO] output file: results/advanced_2025_04_06_00_51_52/eternity_A.txt
+[INFO] visualization file: results/advanced_2025_04_06_00_51_52/eternity_A.png
+[INFO] board size: 4 x 4
+[INFO] solver selected: advanced
+***********************************************************
+Seed:  6135853529662194451
+Iteration  1  best:  7  conflicts:  7  time:  0.010970592498779297
+Seed:  1613707054898281910
+Iteration  2  best:  0  conflicts:  0  time:  0.014960289001464844
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_B.txt
+[INFO] output file: results/advanced_2025_04_06_00_51_52/eternity_B.txt
+[INFO] visualization file: results/advanced_2025_04_06_00_51_52/eternity_B.png
+[INFO] board size: 7 x 7
+[INFO] solver selected: advanced
+***********************************************************
+Seed:  1677239494351348443
+Iteration  1  best:  10  conflicts:  10  time:  0.11968016624450684
+Seed:  9008217891082248195
+Iteration  2  best:  9  conflicts:  9  time:  0.21043825149536133
+Seed:  7245902731480279928
+Iteration  4  best:  8  conflicts:  8  time:  0.18900156021118164
+Seed:  5340271929809553589
+Iteration  6  best:  5  conflicts:  5  time:  0.1466076374053955
+Seed:  8147509516586933517
+Iteration  80  best:  4  conflicts:  4  time:  0.18849563598632812
+Seed:  5652736894972579241
+Iteration  1077  best:  3  conflicts:  3  time:  0.18051767349243164
+Seed:  6954188581829926203
+Iteration  1689  best:  2  conflicts:  2  time:  0.1874988079071045
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 5.0 minutes
+[INFO] Number of conflicts: 2
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_C.txt
+[INFO] output file: results/advanced_2025_04_06_00_51_52/eternity_C.txt
+[INFO] visualization file: results/advanced_2025_04_06_00_51_52/eternity_C.png
+[INFO] board size: 8 x 8
+[INFO] solver selected: advanced
+***********************************************************
+Seed:  1461614330660200714
+Iteration  1  best:  21  conflicts:  21  time:  0.2707829475402832
+Seed:  237393621920916158
+Iteration  4  best:  20  conflicts:  20  time:  0.37399864196777344
+Seed:  4032456471265364076
+Iteration  10  best:  17  conflicts:  17  time:  0.4438285827636719
+Seed:  3478306880489891240
+Iteration  54  best:  16  conflicts:  16  time:  0.49268198013305664
+Seed:  9013621760074109359
+Iteration  62  best:  15  conflicts:  15  time:  0.43483662605285645
+Seed:  1935217455805929588
+Iteration  114  best:  14  conflicts:  14  time:  0.367018461227417
+Seed:  2217268534514246973
+Iteration  318  best:  13  conflicts:  13  time:  0.3141591548919678
+Seed:  6780403697492626164
+Iteration  468  best:  12  conflicts:  12  time:  0.33510398864746094
+Seed:  5099618776535217823
+Iteration  484  best:  11  conflicts:  11  time:  0.38797855377197266
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 5.0 minutes
+[INFO] Number of conflicts: 11
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_D.txt
+[INFO] output file: results/advanced_2025_04_06_00_51_52/eternity_D.txt
+[INFO] visualization file: results/advanced_2025_04_06_00_51_52/eternity_D.png
+[INFO] board size: 9 x 9
+[INFO] solver selected: advanced
+***********************************************************
+Seed:  4148168124668179598
+Iteration  1  best:  31  conflicts:  31  time:  0.42088937759399414
+Seed:  4200405979535125556
+Iteration  4  best:  22  conflicts:  22  time:  0.910581111907959
+Seed:  1186638233443135972
+Iteration  5  best:  21  conflicts:  21  time:  0.47124552726745605
+Seed:  6875437022135650092
+Iteration  25  best:  20  conflicts:  20  time:  0.8129034042358398
+Seed:  2607625836010793179
+Iteration  58  best:  19  conflicts:  19  time:  0.5874438285827637
+Seed:  5722461688636948898
+Iteration  204  best:  18  conflicts:  18  time:  0.6467926502227783
+Seed:  2087300818829635825
+Iteration  221  best:  17  conflicts:  17  time:  0.7435600757598877
+Seed:  6622483483385618816
+Iteration  304  best:  16  conflicts:  16  time:  0.9744336605072021
+Seed:  1181340128313773209
+Iteration  351  best:  15  conflicts:  15  time:  0.5011694431304932
+Seed:  2287481528761289190
+Iteration  414  best:  14  conflicts:  14  time:  0.7046253681182861
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 5.01 minutes
+[INFO] Number of conflicts: 14
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_E.txt
+[INFO] output file: results/advanced_2025_04_06_00_51_52/eternity_E.txt
+[INFO] visualization file: results/advanced_2025_04_06_00_51_52/eternity_E.png
+[INFO] board size: 10 x 10
+[INFO] solver selected: advanced
+***********************************************************
+Seed:  5264641517803590493
+Iteration  1  best:  31  conflicts:  31  time:  1.2871112823486328
+Seed:  2162587519360082978
+Iteration  5  best:  28  conflicts:  28  time:  1.2860848903656006
+Seed:  4598221169256792650
+Iteration  50  best:  25  conflicts:  25  time:  1.4750866889953613
+Seed:  8349507617088838047
+Iteration  103  best:  24  conflicts:  24  time:  1.5873301029205322
+Seed:  4128787358523034980
+Iteration  121  best:  22  conflicts:  22  time:  1.4875404834747314
+Seed:  4370739074139786248
+Iteration  237  best:  21  conflicts:  21  time:  1.7359473705291748
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 5.01 minutes
+[INFO] Number of conflicts: 21
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_complet.txt
+[INFO] output file: results/advanced_2025_04_06_00_51_52/eternity_complet.txt
+[INFO] visualization file: results/advanced_2025_04_06_00_51_52/eternity_complet.png
+[INFO] board size: 16 x 16
+[INFO] solver selected: advanced
+***********************************************************
+Seed:  2633098690484349191
+Iteration  1  best:  82  conflicts:  82  time:  3.245929002761841
+Seed:  8925442618154487329
+Iteration  19  best:  80  conflicts:  80  time:  13.967305183410645
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 5.08 minutes
+[INFO] Number of conflicts: 80
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************

@@ -1,0 +1,280 @@
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_A.txt
+[INFO] output file: results/advanced_2025_04_11_18_42_23/eternity_trivial_A.txt
+[INFO] visualization file: results/advanced_2025_04_11_18_42_23/eternity_trivial_A.png
+[INFO] board size: 2 x 2
+[INFO] solver selected: advanced
+***********************************************************
+NewGlobalBest: Iteration: 1  time:  0.00  best_conflicts:  0  conflicts:  0  time iter:  0.00  nb pieces shuffled:  0  ratio of conflicts:  0.00
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_trivial_B.txt
+[INFO] output file: results/advanced_2025_04_11_18_42_23/eternity_trivial_B.txt
+[INFO] visualization file: results/advanced_2025_04_11_18_42_23/eternity_trivial_B.png
+[INFO] board size: 3 x 3
+[INFO] solver selected: advanced
+***********************************************************
+NewGlobalBest: Iteration: 1  time:  0.00  best_conflicts:  0  conflicts:  0  time iter:  0.00  nb pieces shuffled:  0  ratio of conflicts:  0.00
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_A.txt
+[INFO] output file: results/advanced_2025_04_11_18_42_23/eternity_A.txt
+[INFO] visualization file: results/advanced_2025_04_11_18_42_23/eternity_A.png
+[INFO] board size: 4 x 4
+[INFO] solver selected: advanced
+***********************************************************
+NewGlobalBest: Iteration: 1  time:  0.01  best_conflicts:  9  conflicts:  9  time iter:  0.01  nb pieces shuffled:  0  ratio of conflicts:  0.00
+NewGlobalBest: Iteration: 2  time:  0.08  best_conflicts:  0  conflicts:  0  time iter:  0.07  nb pieces shuffled:  22  ratio of conflicts:  0.86
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 0.0 minutes
+[INFO] Number of conflicts: 0
+[INFO] Feasible solution: True
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_B.txt
+[INFO] output file: results/advanced_2025_04_11_18_42_23/eternity_B.txt
+[INFO] visualization file: results/advanced_2025_04_11_18_42_23/eternity_B.png
+[INFO] board size: 7 x 7
+[INFO] solver selected: advanced
+***********************************************************
+NewGlobalBest: Iteration: 1  time:  0.13  best_conflicts:  34  conflicts:  34  time iter:  0.13  nb pieces shuffled:  0  ratio of conflicts:  0.00
+NewGlobalBest: Iteration: 2  time:  0.41  best_conflicts:  22  conflicts:  22  time iter:  0.28  nb pieces shuffled:  54  ratio of conflicts:  0.43
+NewGlobalBest: Iteration: 6  time:  1.58  best_conflicts:  18  conflicts:  18  time iter:  0.22  nb pieces shuffled:  46  ratio of conflicts:  0.79
+NewGlobalBest: Iteration: 11  time:  3.53  best_conflicts:  17  conflicts:  17  time iter:  0.70  nb pieces shuffled:  58  ratio of conflicts:  0.52
+NewGlobalBest: Iteration: 23  time:  7.89  best_conflicts:  15  conflicts:  15  time iter:  0.47  nb pieces shuffled:  40  ratio of conflicts:  0.90
+NewGlobalBest: Iteration: 28  time:  9.61  best_conflicts:  12  conflicts:  12  time iter:  0.42  nb pieces shuffled:  10  ratio of conflicts:  0.13
+NewGlobalBest: Iteration: 48  time:  17.11  best_conflicts:  11  conflicts:  11  time iter:  0.46  nb pieces shuffled:  44  ratio of conflicts:  0.33
+Restarting search: Iteration: 73  time:  25.38  best_conflicts_cur_search:  11
+NewGlobalBest: Iteration: 94  time:  31.89  best_conflicts:  9  conflicts:  9  time iter:  0.44  nb pieces shuffled:  12  ratio of conflicts:  0.88
+Restarting search: Iteration: 119  time:  40.29  best_conflicts_cur_search:  9
+NewGlobalBest: Iteration: 137  time:  48.39  best_conflicts:  8  conflicts:  8  time iter:  0.25  nb pieces shuffled:  20  ratio of conflicts:  0.54
+Restarting search: Iteration: 162  time:  58.37  best_conflicts_cur_search:  8
+Restarting search: Iteration: 189  time:  66.69  best_conflicts_cur_search:  8
+NewGlobalBest: Iteration: 204  time:  71.78  best_conflicts:  7  conflicts:  7  time iter:  0.76  nb pieces shuffled:  54  ratio of conflicts:  0.21
+Restarting search: Iteration: 229  time:  80.99  best_conflicts_cur_search:  7
+NewGlobalBest: Iteration: 282  time:  99.72  best_conflicts:  4  conflicts:  4  time iter:  0.42  nb pieces shuffled:  18  ratio of conflicts:  0.48
+Restarting search: Iteration: 307  time:  107.20  best_conflicts_cur_search:  4
+Restarting search: Iteration: 358  time:  123.02  best_conflicts_cur_search:  7
+Restarting search: Iteration: 412  time:  141.40  best_conflicts_cur_search:  6
+Restarting search: Iteration: 481  time:  165.21  best_conflicts_cur_search:  5
+Restarting search: Iteration: 544  time:  187.40  best_conflicts_cur_search:  8
+Restarting search: Iteration: 570  time:  196.70  best_conflicts_cur_search:  9
+Restarting search: Iteration: 612  time:  211.45  best_conflicts_cur_search:  12
+Restarting search: Iteration: 664  time:  230.95  best_conflicts_cur_search:  9
+Restarting search: Iteration: 717  time:  250.05  best_conflicts_cur_search:  10
+Restarting search: Iteration: 744  time:  260.77  best_conflicts_cur_search:  20
+NewGlobalBest: Iteration: 771  time:  270.87  best_conflicts:  3  conflicts:  3  time iter:  0.30  nb pieces shuffled:  12  ratio of conflicts:  0.63
+Restarting search: Iteration: 796  time:  278.11  best_conflicts_cur_search:  3
+Restarting search: Iteration: 867  time:  302.06  best_conflicts_cur_search:  6
+Restarting search: Iteration: 944  time:  326.83  best_conflicts_cur_search:  6
+Restarting search: Iteration: 998  time:  346.32  best_conflicts_cur_search:  11
+Restarting search: Iteration: 1055  time:  365.55  best_conflicts_cur_search:  6
+Restarting search: Iteration: 1084  time:  374.74  best_conflicts_cur_search:  7
+Restarting search: Iteration: 1124  time:  388.37  best_conflicts_cur_search:  8
+Restarting search: Iteration: 1178  time:  406.97  best_conflicts_cur_search:  9
+Restarting search: Iteration: 1208  time:  417.41  best_conflicts_cur_search:  8
+Restarting search: Iteration: 1236  time:  427.11  best_conflicts_cur_search:  6
+Restarting search: Iteration: 1266  time:  438.67  best_conflicts_cur_search:  8
+Restarting search: Iteration: 1292  time:  448.60  best_conflicts_cur_search:  14
+Restarting search: Iteration: 1353  time:  468.08  best_conflicts_cur_search:  9
+Restarting search: Iteration: 1469  time:  510.13  best_conflicts_cur_search:  6
+Restarting search: Iteration: 1501  time:  520.99  best_conflicts_cur_search:  7
+Restarting search: Iteration: 1579  time:  548.28  best_conflicts_cur_search:  6
+Restarting search: Iteration: 1644  time:  572.30  best_conflicts_cur_search:  5
+Restarting search: Iteration: 1671  time:  581.54  best_conflicts_cur_search:  10
+Restarting search: Iteration: 1709  time:  595.74  best_conflicts_cur_search:  10
+Restarting search: Iteration: 1762  time:  616.29  best_conflicts_cur_search:  10
+Restarting search: Iteration: 1823  time:  636.25  best_conflicts_cur_search:  6
+Restarting search: Iteration: 1850  time:  645.59  best_conflicts_cur_search:  8
+Restarting search: Iteration: 1900  time:  662.47  best_conflicts_cur_search:  7
+Restarting search: Iteration: 1933  time:  674.51  best_conflicts_cur_search:  10
+Restarting search: Iteration: 1964  time:  684.44  best_conflicts_cur_search:  9
+Restarting search: Iteration: 1990  time:  693.92  best_conflicts_cur_search:  8
+Restarting search: Iteration: 2033  time:  706.82  best_conflicts_cur_search:  10
+Restarting search: Iteration: 2080  time:  722.58  best_conflicts_cur_search:  10
+Restarting search: Iteration: 2125  time:  738.40  best_conflicts_cur_search:  6
+Restarting search: Iteration: 2171  time:  752.62  best_conflicts_cur_search:  10
+Restarting search: Iteration: 2199  time:  762.26  best_conflicts_cur_search:  8
+Restarting search: Iteration: 2248  time:  777.42  best_conflicts_cur_search:  9
+Restarting search: Iteration: 2298  time:  795.70  best_conflicts_cur_search:  8
+Restarting search: Iteration: 2379  time:  822.69  best_conflicts_cur_search:  6
+Restarting search: Iteration: 2428  time:  840.46  best_conflicts_cur_search:  6
+Restarting search: Iteration: 2491  time:  862.54  best_conflicts_cur_search:  8
+Restarting search: Iteration: 2533  time:  876.76  best_conflicts_cur_search:  11
+Restarting search: Iteration: 2562  time:  887.78  best_conflicts_cur_search:  12
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 14.92 minutes
+[INFO] Number of conflicts: 3
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_C.txt
+[INFO] output file: results/advanced_2025_04_11_18_42_23/eternity_C.txt
+[INFO] visualization file: results/advanced_2025_04_11_18_42_23/eternity_C.png
+[INFO] board size: 8 x 8
+[INFO] solver selected: advanced
+***********************************************************
+NewGlobalBest: Iteration: 1  time:  0.30  best_conflicts:  36  conflicts:  36  time iter:  0.30  nb pieces shuffled:  0  ratio of conflicts:  0.00
+NewGlobalBest: Iteration: 21  time:  11.61  best_conflicts:  35  conflicts:  35  time iter:  0.72  nb pieces shuffled:  62  ratio of conflicts:  0.86
+NewGlobalBest: Iteration: 31  time:  17.21  best_conflicts:  31  conflicts:  31  time iter:  0.52  nb pieces shuffled:  8  ratio of conflicts:  0.56
+Restarting search: Iteration: 56  time:  33.48  best_conflicts_cur_search:  31
+NewGlobalBest: Iteration: 57  time:  33.64  best_conflicts:  25  conflicts:  25  time iter:  0.15  nb pieces shuffled:  0  ratio of conflicts:  0.00
+Restarting search: Iteration: 82  time:  49.77  best_conflicts_cur_search:  25
+Restarting search: Iteration: 108  time:  67.63  best_conflicts_cur_search:  33
+Restarting search: Iteration: 155  time:  96.43  best_conflicts_cur_search:  36
+Restarting search: Iteration: 183  time:  113.89  best_conflicts_cur_search:  31
+Restarting search: Iteration: 241  time:  149.98  best_conflicts_cur_search:  35
+Restarting search: Iteration: 270  time:  168.83  best_conflicts_cur_search:  35
+Restarting search: Iteration: 320  time:  196.63  best_conflicts_cur_search:  28
+Restarting search: Iteration: 357  time:  218.88  best_conflicts_cur_search:  34
+Restarting search: Iteration: 383  time:  234.51  best_conflicts_cur_search:  33
+Restarting search: Iteration: 430  time:  262.74  best_conflicts_cur_search:  29
+Restarting search: Iteration: 460  time:  279.50  best_conflicts_cur_search:  32
+Restarting search: Iteration: 511  time:  310.40  best_conflicts_cur_search:  31
+Restarting search: Iteration: 555  time:  336.88  best_conflicts_cur_search:  29
+Restarting search: Iteration: 613  time:  373.08  best_conflicts_cur_search:  30
+Restarting search: Iteration: 670  time:  407.94  best_conflicts_cur_search:  37
+Restarting search: Iteration: 696  time:  423.24  best_conflicts_cur_search:  35
+Restarting search: Iteration: 722  time:  438.62  best_conflicts_cur_search:  36
+Restarting search: Iteration: 753  time:  456.85  best_conflicts_cur_search:  31
+Restarting search: Iteration: 789  time:  478.77  best_conflicts_cur_search:  30
+Restarting search: Iteration: 824  time:  500.54  best_conflicts_cur_search:  35
+Restarting search: Iteration: 850  time:  516.07  best_conflicts_cur_search:  35
+Restarting search: Iteration: 891  time:  542.13  best_conflicts_cur_search:  29
+Restarting search: Iteration: 968  time:  591.79  best_conflicts_cur_search:  27
+Restarting search: Iteration: 994  time:  606.80  best_conflicts_cur_search:  35
+Restarting search: Iteration: 1041  time:  636.23  best_conflicts_cur_search:  34
+Restarting search: Iteration: 1074  time:  657.03  best_conflicts_cur_search:  33
+Restarting search: Iteration: 1134  time:  695.51  best_conflicts_cur_search:  31
+Restarting search: Iteration: 1168  time:  718.10  best_conflicts_cur_search:  30
+Restarting search: Iteration: 1206  time:  740.28  best_conflicts_cur_search:  35
+Restarting search: Iteration: 1268  time:  777.96  best_conflicts_cur_search:  32
+Restarting search: Iteration: 1296  time:  794.78  best_conflicts_cur_search:  32
+Restarting search: Iteration: 1354  time:  830.67  best_conflicts_cur_search:  36
+Restarting search: Iteration: 1389  time:  850.89  best_conflicts_cur_search:  26
+Restarting search: Iteration: 1415  time:  867.22  best_conflicts_cur_search:  27
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 14.92 minutes
+[INFO] Number of conflicts: 25
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_D.txt
+[INFO] output file: results/advanced_2025_04_11_18_42_23/eternity_D.txt
+[INFO] visualization file: results/advanced_2025_04_11_18_42_23/eternity_D.png
+[INFO] board size: 9 x 9
+[INFO] solver selected: advanced
+***********************************************************
+NewGlobalBest: Iteration: 1  time:  0.41  best_conflicts:  55  conflicts:  55  time iter:  0.41  nb pieces shuffled:  0  ratio of conflicts:  0.00
+NewGlobalBest: Iteration: 8  time:  8.23  best_conflicts:  53  conflicts:  53  time iter:  1.20  nb pieces shuffled:  116  ratio of conflicts:  0.28
+NewGlobalBest: Iteration: 9  time:  9.53  best_conflicts:  47  conflicts:  47  time iter:  1.31  nb pieces shuffled:  122  ratio of conflicts:  0.13
+Restarting search: Iteration: 34  time:  37.24  best_conflicts_cur_search:  47
+NewGlobalBest: Iteration: 35  time:  37.54  best_conflicts:  44  conflicts:  44  time iter:  0.30  nb pieces shuffled:  0  ratio of conflicts:  0.00
+Restarting search: Iteration: 60  time:  65.51  best_conflicts_cur_search:  44
+Restarting search: Iteration: 88  time:  96.95  best_conflicts_cur_search:  45
+NewGlobalBest: Iteration: 127  time:  141.48  best_conflicts:  43  conflicts:  43  time iter:  0.69  nb pieces shuffled:  8  ratio of conflicts:  0.73
+NewGlobalBest: Iteration: 138  time:  155.06  best_conflicts:  42  conflicts:  42  time iter:  1.62  nb pieces shuffled:  122  ratio of conflicts:  0.68
+NewGlobalBest: Iteration: 162  time:  182.43  best_conflicts:  38  conflicts:  38  time iter:  0.78  nb pieces shuffled:  14  ratio of conflicts:  0.51
+Restarting search: Iteration: 187  time:  210.41  best_conflicts_cur_search:  38
+Restarting search: Iteration: 222  time:  248.34  best_conflicts_cur_search:  42
+Restarting search: Iteration: 258  time:  287.25  best_conflicts_cur_search:  49
+Restarting search: Iteration: 291  time:  322.67  best_conflicts_cur_search:  41
+Restarting search: Iteration: 331  time:  367.60  best_conflicts_cur_search:  43
+Restarting search: Iteration: 376  time:  420.02  best_conflicts_cur_search:  45
+Restarting search: Iteration: 433  time:  481.12  best_conflicts_cur_search:  44
+Restarting search: Iteration: 477  time:  524.18  best_conflicts_cur_search:  38
+Restarting search: Iteration: 515  time:  567.36  best_conflicts_cur_search:  39
+Restarting search: Iteration: 542  time:  593.41  best_conflicts_cur_search:  45
+Restarting search: Iteration: 568  time:  619.20  best_conflicts_cur_search:  45
+Restarting search: Iteration: 595  time:  643.89  best_conflicts_cur_search:  42
+Restarting search: Iteration: 621  time:  670.85  best_conflicts_cur_search:  39
+Restarting search: Iteration: 664  time:  715.08  best_conflicts_cur_search:  44
+Restarting search: Iteration: 690  time:  742.61  best_conflicts_cur_search:  45
+Restarting search: Iteration: 716  time:  768.61  best_conflicts_cur_search:  43
+Restarting search: Iteration: 752  time:  808.81  best_conflicts_cur_search:  42
+Restarting search: Iteration: 778  time:  833.18  best_conflicts_cur_search:  40
+Restarting search: Iteration: 819  time:  874.72  best_conflicts_cur_search:  40
+NewGlobalBest: Iteration: 830  time:  886.36  best_conflicts:  37  conflicts:  37  time iter:  0.94  nb pieces shuffled:  16  ratio of conflicts:  0.80
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 14.92 minutes
+[INFO] Number of conflicts: 37
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_E.txt
+[INFO] output file: results/advanced_2025_04_11_18_42_23/eternity_E.txt
+[INFO] visualization file: results/advanced_2025_04_11_18_42_23/eternity_E.png
+[INFO] board size: 10 x 10
+[INFO] solver selected: advanced
+***********************************************************
+NewGlobalBest: Iteration: 1  time:  0.49  best_conflicts:  73  conflicts:  73  time iter:  0.49  nb pieces shuffled:  0  ratio of conflicts:  0.00
+NewGlobalBest: Iteration: 4  time:  6.28  best_conflicts:  66  conflicts:  66  time iter:  1.98  nb pieces shuffled:  154  ratio of conflicts:  0.72
+NewGlobalBest: Iteration: 7  time:  11.79  best_conflicts:  62  conflicts:  62  time iter:  1.23  nb pieces shuffled:  98  ratio of conflicts:  0.18
+NewGlobalBest: Iteration: 8  time:  12.88  best_conflicts:  59  conflicts:  59  time iter:  1.09  nb pieces shuffled:  70  ratio of conflicts:  0.17
+NewGlobalBest: Iteration: 27  time:  49.16  best_conflicts:  52  conflicts:  52  time iter:  3.19  nb pieces shuffled:  158  ratio of conflicts:  0.90
+Restarting search: Iteration: 52  time:  95.17  best_conflicts_cur_search:  52
+NewGlobalBest: Iteration: 53  time:  95.69  best_conflicts:  50  conflicts:  50  time iter:  0.52  nb pieces shuffled:  0  ratio of conflicts:  0.00
+Restarting search: Iteration: 78  time:  140.81  best_conflicts_cur_search:  50
+Restarting search: Iteration: 112  time:  198.81  best_conflicts_cur_search:  58
+Restarting search: Iteration: 158  time:  279.02  best_conflicts_cur_search:  54
+Restarting search: Iteration: 184  time:  326.34  best_conflicts_cur_search:  56
+Restarting search: Iteration: 211  time:  371.84  best_conflicts_cur_search:  61
+Restarting search: Iteration: 248  time:  436.09  best_conflicts_cur_search:  58
+Restarting search: Iteration: 274  time:  481.32  best_conflicts_cur_search:  51
+Restarting search: Iteration: 358  time:  632.15  best_conflicts_cur_search:  52
+Restarting search: Iteration: 384  time:  675.04  best_conflicts_cur_search:  50
+Restarting search: Iteration: 424  time:  747.50  best_conflicts_cur_search:  55
+Restarting search: Iteration: 468  time:  823.35  best_conflicts_cur_search:  52
+NewGlobalBest: Iteration: 488  time:  856.31  best_conflicts:  49  conflicts:  49  time iter:  2.03  nb pieces shuffled:  98  ratio of conflicts:  0.78
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 14.92 minutes
+[INFO] Number of conflicts: 49
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************
+***********************************************************
+[INFO] Start the solving Eternity II
+[INFO] input file: instances/eternity_complet.txt
+[INFO] output file: results/advanced_2025_04_11_18_42_23/eternity_complet.txt
+[INFO] visualization file: results/advanced_2025_04_11_18_42_23/eternity_complet.png
+[INFO] board size: 16 x 16
+[INFO] solver selected: advanced
+***********************************************************
+NewGlobalBest: Iteration: 1  time:  4.23  best_conflicts:  175  conflicts:  175  time iter:  4.23  nb pieces shuffled:  0  ratio of conflicts:  0.00
+NewGlobalBest: Iteration: 18  time:  318.71  best_conflicts:  164  conflicts:  164  time iter:  26.34  nb pieces shuffled:  198  ratio of conflicts:  0.88
+Restarting search: Iteration: 43  time:  722.61  best_conflicts_cur_search:  164
+***********************************************************
+[INFO] Solution obtained
+[INFO] Execution time: 14.92 minutes
+[INFO] Number of conflicts: 164
+[INFO] Feasible solution: False
+[INFO] Sanity check passed: True
+***********************************************************

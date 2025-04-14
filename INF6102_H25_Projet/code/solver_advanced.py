@@ -26,6 +26,7 @@ class AdvancedSolver:
             prev_conflicts = self.n_conflicts
             self.solve_LKH(time_to_search_sec)
             self.solve_LKH_complete_tiles(time_to_search_sec)
+            self.solve_LKH(time_to_search_sec)
             if self.n_conflicts >= prev_conflicts:
                 nb_iterations_no_improvement += 1
 
@@ -668,6 +669,8 @@ def get_initial_solution_heuristic_best(eternity_puzzle: EternityPuzzle, time_to
         if conflict_count < best_conflict_count:
             best_conflict_count = conflict_count
             best_solution = solution
+        if conflict_count == 0:
+            break
     return best_solution
 
 def solve_backtrack(eternity_puzzle: EternityPuzzle, search_time: float) -> list[tuple[int, int, int, int]]:
@@ -819,6 +822,7 @@ def solve_advanced(eternity_puzzle):
     """
     TIME_SEARCH_SEC = 3600 # Will be 1 hour for the final version
     TIME_SEARCH_MARGIN = 15 # PUT This to 5 seconds to avoid timing out in the final version
+    TIME_SEARCH_HEURISTIC = TIME_SEARCH_SEC * 0.02 # 2% of the time for the heuristic
 
     NB_ITERATIONS_NO_IMPROVEMENT = 250
 
@@ -858,7 +862,7 @@ def solve_advanced(eternity_puzzle):
         nb_pieces_to_shuffle = 0
         ratio_of_conflicts = 0
         if initial_solution is None: # If there isn't an initial solution
-            initial_solution = get_initial_solution_heuristic_best(eternity_puzzle, TIME_SEARCH_MARGIN)
+            initial_solution = get_initial_solution_heuristic_best(eternity_puzzle, min(TIME_SEARCH_HEURISTIC, time_to_search))
             #initial_solution = solve_backtrack(eternity_puzzle, 5.0)
             #initial_solution = get_initial_solution_semi_random(eternity_puzzle)
             print("Initial solution conflicts: ", eternity_puzzle.get_total_n_conflict(initial_solution))
