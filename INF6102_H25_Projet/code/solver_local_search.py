@@ -227,7 +227,7 @@ def solve_local_search(eternity_puzzle: EternityPuzzle) -> tuple[list[tuple[int,
         random.seed(seed)
         print("Seed: ", seed)
 
-        init_solution = get_initial_solution_semi_random(eternity_puzzle)
+        init_solution = get_initial_solution_heuristic(eternity_puzzle)
         solver = LocalSolver(eternity_puzzle, init_solution)
         solver.solve()
         if solver.n_conflicts < best_conflict_count:

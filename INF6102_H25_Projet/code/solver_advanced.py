@@ -72,13 +72,17 @@ class AdvancedSolver:
             #print("Conflicts: ", self.n_conflicts)
             board_positions = [(x, y) for x in range(self.board_size) for y in range(self.board_size)]
             random.shuffle(board_positions)
-            for x1, y1 in board_positions:
+            
+            queue = board_positions
+
+            for x1, y1 in queue:
                 if time.time() > time_limit:
                     break
                 piece1 = get_piece(self.solution, x1, y1, self.board_size)
                 if get_conflict_count_for_piece(self.solution, x1, y1, piece1, self.board_size) == 0:
                     continue
-                self.do_lkh_swap(x1, y1, piece1, self.get_best_swap_LKH_complete_tiles)
+                swapped_positions = self.do_lkh_swap(x1, y1, piece1, self.get_best_swap_LKH_complete_tiles)
+                queue.extend(swapped_positions)
 
     def solve_best_swaps(self, time_to_search_sec: float = 60):
         """
@@ -165,7 +169,7 @@ class AdvancedSolver:
         # Update the running conflict count
         self.n_conflicts += new_n_conflicts - prev_n_conflicts
 
-    def do_lkh_swap(self, x: int, y: int, piece1: tuple, swap_neighborhood) -> int:
+    def do_lkh_swap(self, x: int, y: int, piece1: tuple, swap_neighborhood) -> list:
         """
         Does a LKH swap, where we continuously swap pieces until no more beneficial swaps are found
         Returns the number of swaps done
@@ -204,7 +208,7 @@ class AdvancedSolver:
             swap = swaps[i]
             self.swap_pieces(swap[0][0], swap[0][1], swap[3], swap[2][0], swap[2][1], swap[1])
 
-        return nb_swaps
+        return swapped_positions[0: best_swap_count]
                      
     def get_best_swap(self, x: int, y: int, piece1: tuple) -> tuple[tuple[int, int, int, int], tuple[int, int], tuple]:
         """
@@ -869,26 +873,25 @@ def solve_advanced(eternity_puzzle):
         else: # If there is an initial solution, perturb it
             percentage_of_shuffle = random.uniform(0.05, 0.50)
             nb_pieces_to_shuffle = int(len(initial_solution) * percentage_of_shuffle)
-            #initial_solution = shuffle_solution_random(initial_solution, nb_pieces_to_shuffle)
             ratio_of_conflicts = random.uniform(0.2, 0.5)
             nb_shuffle_pieces_conflicts = int(nb_pieces_to_shuffle * ratio_of_conflicts)
             nb_shuffle_pieces_no_conflicts = nb_pieces_to_shuffle - nb_shuffle_pieces_conflicts
             initial_solution = shuffle_solution(initial_solution, nb_shuffle_pieces_no_conflicts, nb_shuffle_pieces_conflicts)
-            #nb_pieces_to_shuffle = 2 * nb_pieces_to_shuffle
-            #initial_solution = shuffle_solution(initial_solution, nb_shuffle_pieces_no_conflicts, nb_shuffle_pieces_conflicts)
 
         solver = AdvancedSolver(eternity_puzzle, initial_solution)
         random_choice = random.randint(0, 0)
-        if random_choice == 0:
-            solver.solve_LKH(time_to_search)
-            #solver.solve_LKH_complete_tiles(time_to_search)
-            #solver.solve_LKH_multi_neighborhood(time_to_search)
-        elif random_choice == 1:
-            solver.solve_best_swaps(time_to_search)
-        else:
-            temp = 1
-            cooling_factor = 0.90
-            solver.solve_swap_SA(temp, cooling_factor, time_to_search)
+        solver.solve_LKH(time_to_search)
+
+        # if random_choice == 0:
+            # solver.solve_LKH(time_to_search)
+        #     #solver.solve_LKH_complete_tiles(time_to_search)
+        #     #solver.solve_LKH_multi_neighborhood(time_to_search)
+        # elif random_choice == 1:
+        #     solver.solve_best_swaps(time_to_search)
+        # else:
+        #     temp = 1
+        #     cooling_factor = 0.90
+        #     solver.solve_swap_SA(temp, cooling_factor, time_to_search)
 
 
         iteration_count += 1
