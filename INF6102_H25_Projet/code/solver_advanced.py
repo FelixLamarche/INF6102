@@ -72,17 +72,13 @@ class AdvancedSolver:
             #print("Conflicts: ", self.n_conflicts)
             board_positions = [(x, y) for x in range(self.board_size) for y in range(self.board_size)]
             random.shuffle(board_positions)
-            
-            queue = board_positions
-
-            for x1, y1 in queue:
+            for x1, y1 in board_positions:
                 if time.time() > time_limit:
                     break
                 piece1 = get_piece(self.solution, x1, y1, self.board_size)
                 if get_conflict_count_for_piece(self.solution, x1, y1, piece1, self.board_size) == 0:
                     continue
-                swapped_positions = self.do_lkh_swap(x1, y1, piece1, self.get_best_swap_LKH_complete_tiles)
-                queue.extend(swapped_positions)
+                self.do_lkh_swap(x1, y1, piece1, self.get_best_swap_LKH_complete_tiles)
 
     def solve_best_swaps(self, time_to_search_sec: float = 60):
         """
