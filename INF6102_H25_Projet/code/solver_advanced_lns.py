@@ -330,7 +330,7 @@ def solve_advanced(eternity_puzzle):
     :return: a tuple (solution, cost) where solution is a list of the pieces (rotations applied) and
         cost is the cost of the solution
     """
-    TIME_SEARCH_SEC = 3600 # Will be 1 hour for the final version
+    TIME_SEARCH_SEC = 380 # Will be 1 hour for the final version
     TIME_SEARCH_MARGIN = 5 # PUT This to 5 seconds to avoid timing out in the final version
 
     NB_ITERATIONS_NO_IMPROVEMENT = 100
@@ -339,61 +339,47 @@ def solve_advanced(eternity_puzzle):
     best_conflict_count = 999
     best_solution_cur_search = None # Best solution found in the current search
     best_conflict_count_cur_search = 999
-    percent_destroy = 0.4
+    percent_destroy = 0.15
 
     time_before = time.time()
-    initial_solution = None
     iteration_count = 0
     iteration_without_improvement = 0
     while time.time() - time_before < TIME_SEARCH_SEC - TIME_SEARCH_MARGIN:
+
         time_start_iter = time.time()
         time_to_search = TIME_SEARCH_SEC - (time.time() - time_before) - TIME_SEARCH_MARGIN
 
-        # Set a random seed
-        seed = random.randint(1, sys.maxsize)
-        random.seed(seed)
-        #print("Seed: ", seed)
-
-        # Restart search if no improvement were made
-        if iteration_without_improvement >= NB_ITERATIONS_NO_IMPROVEMENT:
-            best_solution_cur_search = None 
-            best_conflict_count_cur_search = 999
-            percent_destroy = 0.4
-
-        initial_solution = best_solution_cur_search
-        nb_pieces_to_shuffle = 0
-        if initial_solution is None:
-            initial_solution = get_initial_solution_heuristic(eternity_puzzle)
-        else:
-            percentage_of_shuffle = random.uniform(0.01, 0.80)
-            nb_pieces_to_shuffle = int(len(initial_solution) * percentage_of_shuffle)
-            initial_solution = shuffle_solution(initial_solution, nb_pieces_to_shuffle)
-            #print("Shuffled ", nb_pieces_to_shuffle, " pieces")
+        if iteration_count % 4 == 0 :
+            if best_solution == None :
+                best_solution = get_initial_solution_heuristic(eternity_puzzle)
+            initial_solution = best_solution
+        else :
+            initial_solution = get_initial_solution_semi_random(eternity_puzzle)
 
         solver = AdvancedSolver(eternity_puzzle, initial_solution)
-        # solver.solve(time_to_search)
-        # solver.solve_local_search(time_to_search)
-        solver.solve_lns(percent_destroy)
+        best_solution_cur_search = initial_solution
+        best_conflict_count_cur_search = solver.n_conflicts
 
-        iteration_count += 1
-        iteration_without_improvement += 1
+        # Restart search if no improvement were made
+        while iteration_without_improvement < NB_ITERATIONS_NO_IMPROVEMENT :
+            solver.solve_lns(percent_destroy=0.1)
 
-        if solver.n_conflicts < best_conflict_count_cur_search:
-            best_conflict_count_cur_search = solver.n_conflicts
-            best_solution_cur_search = solver.solution
-            percent_destroy = min(percent_destroy*0.8, 0.1)
-            iteration_without_improvement = 0
-            # print("NewLocalBest : Iteration:", iteration_count, " time: ", "{:.2f}".format(time.time() - time_before), " best_conflicts: ", best_conflict_count, " conflicts: ", solver.n_conflicts, " time iter: ", "{:.2f}".format(time.time() - time_start_iter), " nb pieces shuffled: ", nb_pieces_to_shuffle)
+            iteration_count += 1
+            iteration_without_improvement += 1
 
-        #print("Conflicts: ", solver.n_conflicts)
-        if solver.n_conflicts < best_conflict_count:
-            best_conflict_count = solver.n_conflicts
-            best_solution = solver.solution
-            print("NewGlobalBest: Iteration:", iteration_count, " time: ", "{:.2f}".format(time.time() - time_before), " best_conflicts: ", best_conflict_count, " conflicts: ", solver.n_conflicts, " time iter: ", "{:.2f}".format(time.time() - time_start_iter), " nb pieces shuffled: ", nb_pieces_to_shuffle)
+            if solver.n_conflicts < best_conflict_count_cur_search:
+                best_conflict_count_cur_search = solver.n_conflicts
+                best_solution_cur_search = solver.solution
+                iteration_without_improvement = 0
 
+            #print("Conflicts: ", solver.n_conflicts)
+            if solver.n_conflicts < best_conflict_count:
+                best_conflict_count = solver.n_conflicts
+                best_solution = solver.solution
+                print("NewGlobalBest: Iteration:", iteration_count, " time: ", "{:.2f}".format(time.time() - time_before), " best_conflicts: ", best_conflict_count, " conflicts: ", solver.n_conflicts, " time iter: ", "{:.2f}".format(time.time() - time_start_iter))
 
-        if best_conflict_count == 0:
-            break
+            if best_conflict_count == 0:
+                break
 
     return best_solution, eternity_puzzle.get_total_n_conflict(best_solution)
 
