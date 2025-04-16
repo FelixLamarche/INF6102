@@ -5,6 +5,7 @@ import solver_random
 import solver_heuristic
 import solver_local_search
 import solver_advanced
+import solver_advanced_lns
 
 
 def parse_arguments():
@@ -49,6 +50,8 @@ if __name__ == '__main__':
     elif args.agent == "advanced":
         # Your nice agent (Phase 3 - main part of the project)
         solution, n_conflict = solver_advanced.solve_advanced(e)
+    elif args.agent == 'advanced_lns':
+        solution, n_conflict = solver_advanced_lns.solve_advanced(e)
     else:
         raise Exception("This agent does not exist")
     solving_time = round((time.time() - start_time) / 60,2)

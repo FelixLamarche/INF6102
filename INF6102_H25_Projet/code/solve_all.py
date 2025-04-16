@@ -56,16 +56,13 @@ if __name__ == '__main__':
             solution, n_conflict = solver_local_search.solve_local_search(e)
         elif args.agent == "advanced":
             # Your nice agent (Phase 3 - main part of the project)
-            # solution, n_conflict = solver_advanced.solve_advanced(e)
-            solution, n_conflict = solver_advanced_lns.solve_advanced(e)
+            solution, n_conflict = solver_advanced.solve_advanced(e)
         else:
             raise Exception("This agent does not exist")
         solving_time = round((time.time() - start_time) / 60,2)
 
-        filename = os.path.basename(args.infile)    # 'eternity_A.txt'
+        filename = os.path.basename(instance)    # 'eternity_A.txt'
         filename = os.path.splitext(filename)[0]
-        e.display_solution(solution, filename+'_'+args.visufile)
-        e.print_solution(solution, filename+'_'+args.outfile)
         e.display_solution(solution, filename+'_'+args.visufile)
         e.print_solution(solution, filename+'_'+args.outfile)
 
