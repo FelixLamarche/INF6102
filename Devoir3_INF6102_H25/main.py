@@ -9,7 +9,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
 
     # Instances parameters
-    parser.add_argument('--agent', type=str, default='naive')
+    parser.add_argument('--agent', type=str, default='advanced')
     parser.add_argument('--infile', type=str, default='./instances/trivial.txt')
     parser.add_argument('--no-viz', default=False, action='store_true')
 
