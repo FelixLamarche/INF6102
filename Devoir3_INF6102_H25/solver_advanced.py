@@ -406,7 +406,7 @@ class SolverAdvanced :
         """
         # Keep doing local search until no improvement is found
         neighborhoods_without_improvement = 0
-        NB_NEIGHBORHOODS = 8
+        NB_NEIGHBORHOODS = 12
         while neighborhoods_without_improvement < NB_NEIGHBORHOODS and time.time() < self.timeout_time:
             prev_cost = self.cost
 
@@ -824,8 +824,8 @@ def solve(instance: Instance) -> Solution:
     Returns:
         Solution: A solution object initialized with an iterator on Edge object
     """
-    #TIME_LIMIT_SEC = get_time_limit(instance)
-    TIME_LIMIT_SEC = 60
+    #TIME_LIMIT_SEC = 60
+    TIME_LIMIT_SEC = get_time_limit(instance)
     TIME_LIMIT_MARGIN_SEC = 15
 
     timeout_time = time.time() + TIME_LIMIT_SEC - TIME_LIMIT_MARGIN_SEC
@@ -836,16 +836,16 @@ def solve(instance: Instance) -> Solution:
     while time.time() < timeout_time:
         solver = SolverAdvanced(instance, timeout_time)
         # Set initial solution
-        #init_seq = solver.solve_heuristic()
-        init_seq = solver.solve_naive_random()
+        init_seq = solver.solve_heuristic()
+        #init_seq = solver.solve_naive_random()
         #init_seq = solver.naive_solution()
         solver.set_initial_seq(init_seq)
 
+        # solver.best_seq = solver.solve_heuristic()
         #solver.solve_move_1()
         #solver.solve_move_k(6)
         #solver.solve_hill_climbing_2_opt()
         solver.solve_VND()
-        # solver.best_seq = solver.solve_heuristic()
 
         if solver.best_cost < best_seq_cost:
             best_seq_cost = solver.best_cost
