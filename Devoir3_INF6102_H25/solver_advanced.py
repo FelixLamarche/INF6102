@@ -92,7 +92,7 @@ class SolverAdvanced :
             self.seq = self.seq[:insert_pos] + subseq + self.seq[insert_pos:]
             self.cost = best_move_cost
             self.compute_stocks()
-            print(f"Best Moved products {subseq} from day {i} to day {j}, k={k}")
+            # print(f"Best Moved products {subseq} from day {i} to day {j}, k={k}")
 
     def best_or_k_opt_move(self, k):
         """
@@ -139,7 +139,7 @@ class SolverAdvanced :
             self.seq = self.seq[:insert_pos] + subseq + self.seq[insert_pos:]
             self.cost = best_move_cost
             self.compute_stocks()
-            print(f"Best Moved products {subseq} from day {i} to day {j}, k={k}")
+            # print(f"Best Moved products {subseq} from day {i} to day {j}, k={k}")
 
     def first_or_opt_move_1_pop_insert(self):
         """
@@ -179,7 +179,7 @@ class SolverAdvanced :
             self.seq.insert(j, product)
             self.cost = best_move_cost
             self.compute_stocks()
-            print(f"Moved product {product} from day {i} to day {j}, pop-insert")
+            # print(f"Moved product {product} from day {i} to day {j}, pop-insert")
 
     def best_or_opt_move_1_pop_insert(self):
         """
@@ -217,7 +217,7 @@ class SolverAdvanced :
             self.seq.insert(j, product)
             self.cost = best_move_cost
             self.compute_stocks()
-            print(f"Best Moved product {product} from day {i} to day {j}, pop-insert")
+            # print(f"Best Moved product {product} from day {i} to day {j}, pop-insert")
 
     def first_or_opt_move_1_insert_pop(self):
         """
@@ -275,7 +275,7 @@ class SolverAdvanced :
 
             self.cost = best_move_cost
             self.compute_stocks()
-            print(f"Moved product {product} from day {i} to day {j}, insert-pop")
+            # print(f"Moved product {product} from day {i} to day {j}, insert-pop")
 
     def best_or_opt_move_1_insert_pop(self):
         """
@@ -327,76 +327,8 @@ class SolverAdvanced :
 
             self.cost = best_move_cost
             self.compute_stocks()
-            print(f"Best Moved product {product} from day {i} to day {j}, insert-pop")
+            # print(f"Best Moved product {product} from day {i} to day {j}, insert-pop")
 
-    def first_2_opt_swap(self):
-        """
-        Best 2-opt swap local search
-        """
-        days = [i for i in range(self.J)]
-        random.shuffle(days)
-
-        best_swap = None
-        best_swap_cost = 1e10
-        for j1 in days:
-            for j2 in days[j1+1:]:
-                product1, product2 = self.seq[j1], self.seq[j2]
-
-                if product1 == product2:
-                    continue
-                
-                new_cost = self.test_swap(min(j1, j2), max(j1, j2))
-                if not new_cost:
-                    continue
-                
-                if new_cost < self.cost:
-                    best_swap = (j1, j2)
-                    best_swap_cost = new_cost
-                    break
-            if best_swap:
-                break
-
-        if best_swap:
-            j1, j2 = best_swap
-            product1 = self.seq[j1]
-            product2 = self.seq[j2]
-            self.seq[j1] = product2
-            self.seq[j2] = product1
-            self.cost = best_swap_cost # Updates cost
-            self.compute_stocks()   # Updates stocks
-            print(f"Swapped Day:{j1} and Day:{j2} for products:{product1} and {product2}")
-
-    def best_2_opt_swap(self):
-        """
-        Best 2-opt swap local search
-        """
-        best_swap = None
-        best_swap_cost = 1e10
-
-        for j1 in range(self.J) :
-            for j2 in range(j1+1, self.J) :
-                product1, product2 = self.seq[j1], self.seq[j2]
-
-                if product1 == product2:
-                    continue
-
-                new_cost = self.test_swap(j1, j2)
-                if not new_cost:
-                    continue
-                
-                if new_cost < best_swap_cost:
-                    best_swap = (j1, j2)
-                    best_swap_cost = new_cost
-
-        if best_swap :
-            j1, j2 = best_swap
-            product1 = self.seq[j1]
-            product2 = self.seq[j2]
-            self.seq[j1] = product2
-            self.seq[j2] = product1
-            self.cost = best_swap_cost # Updates cost
-            self.compute_stocks()   # Updates stocks
-            print(f"Swapped Best Day:{j1} and Day:{j2} for products:{product1} and {product2}")
 
     def solve_VND(self):
         """
@@ -430,7 +362,41 @@ class SolverAdvanced :
             if self.cost < self.best_cost:
                 self.best_cost = self.cost
                 self.best_seq = self.seq[:]
-                print(f"New best cost: {self.best_cost}\n")
+                # print(f"New best cost: {self.best_cost}\n")
+
+    def skewed_VNS(self, alpha) :
+            """
+            Skewed version of the VNS. Is quite slow so does not perform well
+            Hill-climbing instead of VND in the loop
+            """
+            neighborhoods_without_improvement = 0
+            NB_NEIGHBORHOODS = 8
+            while neighborhoods_without_improvement < NB_NEIGHBORHOODS and time.time() < self.timeout_time:
+                previous_seq = self.seq[:]
+                prev_cost = self.cost
+                # Random selection of a neighbor
+                if neighborhoods_without_improvement == 0 :
+                    self.first_or_opt_move_1_pop_insert()
+                elif neighborhoods_without_improvement == 1 :
+                    self.first_or_opt_move_1_insert_pop()
+                else : 
+                    k = neighborhoods_without_improvement
+                    self.first_or_k_opt_move(k)
+
+                # Hill climbing
+                if neighborhoods_without_improvement == 0 :
+                    self.solve_move_k(1)
+                else :
+                    self.solve_move_k(neighborhoods_without_improvement)
+
+                # Neighborhood change
+                if self.cost < prev_cost + alpha*(prev_cost - self.cost) :
+                    neighborhoods_without_improvement = 0
+                    if self.cost > prev_cost :
+                        print(f"Mauvaise solution acceptée")
+                else :
+                    self.seq = previous_seq[:]
+                    neighborhoods_without_improvement += 1
 
     def solve_move_1(self):
         """
@@ -446,7 +412,7 @@ class SolverAdvanced :
             if self.cost < self.best_cost:
                 self.best_cost = self.cost
                 self.best_seq = self.seq[:]
-                print(f"New best cost: {self.best_cost}")
+                # print(f"New best cost: {self.best_cost}")
 
     def solve_move_k(self, k):
         """
@@ -467,51 +433,8 @@ class SolverAdvanced :
             if self.cost < self.best_cost:
                 self.best_cost = self.cost
                 self.best_seq = self.seq[:]
-                print(f"New best cost: {self.best_cost}")
+                # print(f"New best cost: {self.best_cost}")
             
-    def solve_hill_climbing_2_opt(self) :
-        """
-        Does a hill climbing resolution using 2-opt local search
-        Gives 4.74/8 and is very fast
-        """
-        improved = True
-        already_moved = set()
-        while improved :
-            improved = False
-
-            best_swap = None
-            best_swap_cost = 1e10
-
-            for j1 in range(self.J) :
-                for j2 in range(j1+1, self.J) :
-                    product1, product2 = self.seq[j1], self.seq[j2]
-
-                    # If it's the same product or nothing is produced, continue
-                    if j1 == j2 or product1 == product2 or product1 == -1 or product2 == -1 :
-                        continue
-
-                    new_cost = self.test_swap(j1, j2)
-                    if not new_cost :
-                        continue
-                    
-                    if new_cost < best_swap_cost and j1 not in already_moved :
-                        best_swap = (j1, j2)
-                        best_swap_cost = new_cost
-
-            if best_swap :
-                j1, j2 = best_swap
-                product1 = self.seq[j1]
-                product2 = self.seq[j2]
-                self.seq[j1] = product2
-                self.seq[j2] = product1
-                self.cost = best_swap_cost # Updates cost
-                self.compute_stocks()   # Updates stocks
-                print(f"Day {j1} and day {j2} swapped")
-                already_moved.add(j1)
-                improved = True
-
-            self.best_seq = self.seq
-            self.best_cost = self.cost
 
     def set_initial_seq(self, seq):
         self.seq = seq
@@ -608,94 +531,6 @@ class SolverAdvanced :
             
         return best_product
 
-    def calculate_delta_holding_cost(self, i, j) :
-        """
-        Compute the change in holding cost when moving the product at index i to index j.
-        """
-        if i == j:
-            return 0
-
-        seq_before = self.seq
-        seq_after = seq_before[:]
-        product = seq_after.pop(i)
-        seq_after.insert(j, product)
-        idx_start = min(i, j)
-        idx_end = max(i, j)
-
-        # Calculate delta holding cost
-        holding_cost_before = 0
-        holding_cost_after = 0
-
-        for c in range(self.C):
-            stock_before = 0
-            stock_after = 0
-            for day in range(idx_start, idx_end+1):
-                if seq_before[day] == c:
-                    stock_before += 1
-                if seq_after[day] == c:
-                    stock_after += 1
-                if self.instance.order(day, c):
-                    stock_before -= 1
-                    stock_after -= 1
-                holding_cost_before += stock_before
-                holding_cost_after += stock_after 
-
-        delta_holding = self.H * (holding_cost_after - holding_cost_before)
-
-        return delta_holding
-    
-    def calculate_delta_transition_costs(self, i, j) :
-        """
-        DOES NOT WORK
-        """
-        if i == j:
-            return 0
-
-        seq = self.seq[:]
-        product = seq[i]
-
-        old_tran = 0
-        new_tran = 0
-
-        prev_i = self.get_prev_idx(self.seq, i)
-        next_i = self.get_next_idx(self.seq, i)
-        prev_j = self.get_prev_idx(self.seq, j)
-
-        if prev_i is not None:
-            old_tran += self.transition_costs[self.seq[prev_i]][product]
-        if next_i is not None:
-            old_tran += self.transition_costs[product][self.seq[next_i]]
-        if prev_j is not None :
-            old_tran += self.transition_costs[self.seq[prev_j]][self.seq[j]]
-
-        if prev_i and next_i :
-            new_tran += self.transition_costs[self.seq[prev_i]][self.seq[next_i]]
-        if prev_j is not None :
-            new_tran += self.transition_costs[self.seq[prev_j]][product]
-        new_tran += self.transition_costs[self.seq[j]][product]
-
-        return new_tran - old_tran
-    
-    def get_prev_idx(self, seq, idx):
-        """
-        For a given idx, gives the closest index before where something is produced
-        Used to compute transition costs
-        """
-        for i in range(idx - 1, -1, -1):
-            if seq[i] != -1:
-                return i
-        return None
-
-    def get_next_idx(self, seq, idx) :
-        """
-        For a given idx, gives the closest index after where something is produced
-        Used to compute transition costs
-        """
-        for i in range(idx + 1, self.J):
-            if seq[i] != -1:
-                return i
-        return None
-            
     def test_seq_stocks(self, seq) :
         """
         Checks if a sequence is valid in termes of demand
@@ -713,38 +548,6 @@ class SolverAdvanced :
                     return False
             
         return True
-
-    def test_swap(self, j1, j2) :
-        """
-        Checks if a swap between j1 and j2 is valid in terms of demand and if it improves the current solution
-        Requires that: j1 < j2
-        """
-        # Check if swap is possible in terms of demand and stocks
-        product1 = self.seq[j1]
-        product2 = self.seq[j2]
-
-        for j in range(j1, j2):
-            if product1 in self.day_demands[j]:
-                if self.stocks[product1][j] -1 < 0 :
-                    return False
-                
-        # Check if the swap improves the solution
-        current_seq = self.seq[:]
-        current_cost = self.cost
-        self.seq[j1] = product2
-        self.seq[j2] = product1
-        new_cost = self.compute_cost()
-        if new_cost >= current_cost :
-            # Go back to initial seq
-            self.seq = current_seq
-            self.cost = current_cost
-            return False
-        
-        # Go back to initial seq
-        self.seq = current_seq
-        self.cost = current_cost
-        
-        return new_cost
 
     def compute_cost(self) :
         # Compute storage cost
@@ -824,7 +627,7 @@ def solve(instance: Instance) -> Solution:
     Returns:
         Solution: A solution object initialized with an iterator on Edge object
     """
-    #TIME_LIMIT_SEC = 60
+    # TIME_LIMIT_SEC = 60
     TIME_LIMIT_SEC = get_time_limit(instance)
     TIME_LIMIT_MARGIN_SEC = 15
 
@@ -841,10 +644,6 @@ def solve(instance: Instance) -> Solution:
         #init_seq = solver.naive_solution()
         solver.set_initial_seq(init_seq)
 
-        # solver.best_seq = solver.solve_heuristic()
-        #solver.solve_move_1()
-        #solver.solve_move_k(6)
-        #solver.solve_hill_climbing_2_opt()
         solver.solve_VND()
 
         if solver.best_cost < best_seq_cost:
